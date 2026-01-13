@@ -44,7 +44,10 @@ public func configure(_ app: Application) async throws {
         }
     #endif
 
-    let key = HMACKey(from: Data(base64Encoded: secret)!)
+    guard let data = Data(base64Encoded: secret) else {
+        fatalError("JWT_SECRET must be base64 encoded")
+    }
+    let key = HMACKey(from: data)
     await app.jwt.keys.add(hmac: key, digestAlgorithm: .sha256)
 
     // MARK: - Repository 등록
@@ -73,6 +76,8 @@ public func configure(_ app: Application) async throws {
 
 func generateJWTSecret() -> String {
     var bytes = [UInt8](repeating: 0, count: 32)
-    _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+    let fd = fopen("/dev/urandom", "rb")!
+    fread(&bytes, 1, bytes.count, fd)
+    fclose(fd)
     return Data(bytes).base64EncodedString()
 }
