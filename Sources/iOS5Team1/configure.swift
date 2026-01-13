@@ -13,8 +13,6 @@ public func configure(_ app: Application) async throws {
     if let port = Environment.get("PORT").flatMap(Int.init) {
         print("[INFO] PORT from ENV =", port)
         app.http.server.configuration.port = port
-    } else {
-        print("[WARN] PORT not found in ENV, using default 8080")
     }
 
     // MARK: - ENV DEBUG
