@@ -53,13 +53,13 @@ WORKDIR /app
 
 COPY --from=build --chown=vapor:vapor /staging /app
 
+# 실행/검색 권한 추가 (핵심 수정)
+RUN chmod -R 755 /app
+
 ENV SWIFT_BACKTRACE=enable=yes,sanitize=yes,threads=all,images=all,interactive=no,swift-backtrace=./swift-backtrace-static
 
 USER vapor:vapor
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "set -x; ls -l; ./iOS5Team1 serve --env production --hostname 0.0.0.0 --port ${PORT:-8080}"]
-
-
-
+CMD ["sh", "-c", "./iOS5Team1 serve --env production --hostname 0.0.0.0 --port ${PORT:-8080}"]
