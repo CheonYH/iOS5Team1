@@ -59,6 +59,7 @@ USER vapor:vapor
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "./iOS5Team1 serve --env production --hostname 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["sh", "-c", "set -x; ls -l; ./iOS5Team1 serve --env production --hostname 0.0.0.0 --port ${PORT:-8080}"]
+
 
 
