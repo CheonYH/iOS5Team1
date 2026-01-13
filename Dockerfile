@@ -47,15 +47,14 @@ RUN [ -d /build/Resources ] && { mv /build/Resources ./Resources && chmod -R a-w
 FROM ubuntu:noble
 
 # Install runtime dependencies
-RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
-    && apt-get -q update \
-    && apt-get -q dist-upgrade -y \
-    && apt-get -q install -y \
-      libjemalloc2 \
-      libmysqlclient-dev \
-      ca-certificates \
-      tzdata \
-    && rm -r /var/lib/apt/lists/*
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install -y \
+        libjemalloc2 \
+        libmysqlclient21 \
+        ca-certificates \
+        tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create vapor user
 RUN useradd --user-group --create-home --system --skel /dev/null --home-dir /app vapor
