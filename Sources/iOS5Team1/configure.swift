@@ -53,10 +53,12 @@ public func configure(_ app: Application) async throws {
         tlsConfiguration: .none
     ), as: .mysql)
 
+    let sql = app.db(.mysql) as! (any SQLDatabase)
+    
     // 🔹 DB Ping 테스트
     Task {
         do {
-            try await app.db(.mysql).raw("SELECT 1").run()
+            try await sql.raw("SELECT 1").run()
             print("[DB] Connection OK!")
         } catch {
             print("[DB ERROR] Connection failed:", error.localizedDescription)
