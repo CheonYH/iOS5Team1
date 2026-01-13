@@ -70,4 +70,4 @@ USER vapor:vapor
 EXPOSE 8080
 
 ENTRYPOINT ["./iOS5Team1"]
-CMD ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
+CMD ["serve", "--env", "production", "--hostname", "0.0.0.0"]
