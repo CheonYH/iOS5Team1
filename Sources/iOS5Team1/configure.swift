@@ -71,6 +71,8 @@ public func configure(_ app: Application) async throws {
     // MARK: - Controller 등록
     try app.register(collection: AuthController(authService: authService, users: userRepo))
     try app.register(collection: ReviewController(service: reviewService))
+
+    try routes(app)
 }
 
 
