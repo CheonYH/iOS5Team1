@@ -7,6 +7,11 @@ import Vapor
 
 func routes(_ app: Application) throws {
 
+
+    app.get("health") { req async -> String in
+        return "OK"
+    }
+
     // Auth Dependencies
     guard let authService = app.storage[AuthServiceKey.self] else {
         fatalError("AuthService not registered")

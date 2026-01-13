@@ -29,7 +29,7 @@ public func configure(_ app: Application) async throws {
        username: user,
        password: password,
        database: dbname,
-       tlsConfiguration: nil
+       tlsConfiguration: .none
     ), as: .mysql)
 
 
