@@ -15,6 +15,8 @@ public func configure(_ app: Application) async throws {
         app.http.server.configuration.port = port
     }
 
+    app.http.server.configuration.hostname = "0.0.0.0"
+
     // MARK: - ENV DEBUG
     print("===== [ENV CHECK] =====")
     let envVars = [
