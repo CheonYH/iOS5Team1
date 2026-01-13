@@ -1,14 +1,30 @@
 import Fluent
+import FluentMySQLDriver
+import MySQLKit
+import SQLKit
 import Vapor
 
+
 func routes(_ app: Application) throws {
-    app.get { req async in
-        "It works!"
+
+    // Auth Dependencies
+    guard let authService = app.storage[AuthServiceKey.self] else {
+        fatalError("AuthService not registered")
+    }
+    guard let users = app.storage[UserRepositoryKey.self] else {
+        fatalError("UserRepository not registered")
     }
 
-    app.get("hello") { req async -> String in
-        "Hello, world!"
+    let authController = AuthController(authService: authService, users: users)
+    try app.register(collection: authController)
+
+    // Review Dependencies
+    guard let reviewService = app.storage[ReviewServiceKey.self] else {
+        fatalError("ReviewService not registered")
     }
 
-    try app.register(collection: TodoController())
+    let reviewController = ReviewController(service: reviewService)
+    try app.register(collection: reviewController)
 }
+
+
