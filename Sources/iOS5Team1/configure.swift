@@ -54,7 +54,6 @@ public func configure(_ app: Application) async throws {
     ), as: .mysql)
 
     let sql = app.db(.mysql) as! (any SQLDatabase)
-    
     // 🔹 DB Ping 테스트
     Task {
         do {
@@ -83,8 +82,6 @@ public func configure(_ app: Application) async throws {
     }
 
     // MARK: - Repository / Service
-    let sql = app.db(.mysql) as! (any SQLDatabase)
-
     let userRepo = MySQLUserRepository(db: sql)
     let refreshRepo = MySQLRefreshTokenRepository(db: sql)
     let reviewRepo = MySQLReviewRepository(database: sql)
