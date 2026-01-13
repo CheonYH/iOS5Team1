@@ -59,5 +59,6 @@ USER vapor:vapor
 
 EXPOSE 8080
 
-# 핵심 변경
-CMD ["./iOS5Team1", "serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "$PORT"]
+CMD ["sh", "-c", "./iOS5Team1 serve --env production --hostname 0.0.0.0 --port ${PORT:-8080}"]
+
+
