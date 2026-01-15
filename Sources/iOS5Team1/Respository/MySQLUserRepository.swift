@@ -45,6 +45,18 @@ actor MySQLUserRepository: UserRepository {
         return try row.decode(column: "user_exists", as: Bool.self)
     }
 
+    func exists(nickname: String) async throws -> Bool {
+        let rows = try await db.raw("""
+            SELECT EXISTS(SELECT 1 FROM users WHERE nickname = \(bind: nickname)) AS nickname_exists
+            """).all()
+
+        guard let row = rows.first else {
+            throw RepositoryError.queryFailed
+        }
+
+        return try row.decode(column: "nickname_exists", as: Bool.self)
+    }
+
     func create(email: String, password: String, nickname: String) async throws -> User {
         try await db.raw("""
             INSERT INTO users (email, password, nickname)

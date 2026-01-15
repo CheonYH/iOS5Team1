@@ -10,6 +10,7 @@ import SQLKit
 
 protocol UserRepository: Sendable {
     func exists(email: String) async throws -> Bool
+    func exists(nickname: String) async throws -> Bool
     func create(email: String, password: String, nickname: String) async throws -> User
     func findByEmail(_ email: String) async throws -> User?
 }

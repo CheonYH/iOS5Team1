@@ -18,6 +18,7 @@ struct AuthController: RouteCollection, Sendable {
         auth.post("login", use: login)
         auth.post("refresh", use: refresh)
         auth.post("logout", use: logout)
+        auth.post("nickname-check", use: checkNickname)
     }
 
     func register(req: Request) async throws -> RegisterResponse {
@@ -47,6 +48,14 @@ struct AuthController: RouteCollection, Sendable {
         let body = try req.content.decode(RefreshRequest.self)
         try await authService.logout(refreshToken: body.refreshToken)
         return .ok
+    }
+
+    func checkNickname(req: Request) async throws -> NicknameAvailabilityResponse {
+        let body = try req.content.decode(NicknameCheckRequest.self)
+
+        let exists = try await users.exists(nickname: body.nickname)
+
+        return .init(available: !exists)
     }
 }
 
