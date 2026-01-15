@@ -35,14 +35,14 @@ actor MySQLUserRepository: UserRepository {
 
     func exists(email: String) async throws -> Bool {
         let rows = try await db.raw("""
-            SELECT EXISTS(SELECT 1 FROM users WHERE email = \(bind: email)) AS exists
+            SELECT EXISTS(SELECT 1 FROM users WHERE email = \(bind: email)) AS user_exists
             """).all()
 
         guard let row = rows.first else {
             throw RepositoryError.queryFailed
         }
 
-        return try row.decode(column: "exists", as: Bool.self)
+        return try row.decode(column: "user_exists", as: Bool.self)
     }
 
     func create(email: String, password: String, nickname: String) async throws -> User {
