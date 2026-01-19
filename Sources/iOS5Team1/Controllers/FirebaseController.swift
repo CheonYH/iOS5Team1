@@ -9,16 +9,18 @@ import Vapor
 
 struct FirebaseController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
-        routes.get("firebase", "config") { req async throws -> Response in
-            guard let apiKey = req.application.storage[FirebaseAPIKey.self] else {
+        routes.get("firebase", "config") { req async throws -> FirebaseConfigResponse in
+            guard let cfg = req.application.storage[FirebaseConfigKey.self] else {
                 throw Abort(.internalServerError)
             }
 
-            struct FirebaseConfig: Content {
-                let apiKey: String
-            }
-
-            return Response(status: .ok, body: .init(data: try JSONEncoder().encode(FirebaseConfig(apiKey: apiKey))))
+            return FirebaseConfigResponse(
+                apiKey: cfg.apiKey,
+                appId: cfg.appId,
+                gcmSenderId: cfg.gcmSenderId,
+                projectId: cfg.projectId,
+                storageBucket: cfg.storageBucket
+            )
         }
     }
 }

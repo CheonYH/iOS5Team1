@@ -39,7 +39,9 @@ public func configure(_ app: Application) async throws {
         "DATABASE_USERNAME", "DATABASE_PASSWORD",
         "DATABASE_NAME", "JWT_SECRET",
         "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET",
-        "FIREBASE_API_KEY"
+        "FIREBASE_API_KEY", "FIREBASE_APP_ID",
+        "FIREBASE_GCM_SENDER_ID", "FIREBASE_PROJECT_ID",
+        "FIREBASE_STORAGE_BUCKET"
     ]
     for key in envVars {
         print("[ENV]", key, "=", Environment.get(key) ?? "NIL")
@@ -117,12 +119,18 @@ public func configure(_ app: Application) async throws {
         clientId: Environment.get("IGDB_CLIENT_ID") ?? "",
         clientSecret: Environment.get("IGDB_CLIENT_SECRET") ?? ""
     )
-    let firebaseApiKey = Environment.get("FIREBASE_API_KEY") ?? ""
 
     app.storage[AuthServiceKey.self] = authService
     app.storage[ReviewServiceKey.self] = reviewService
     app.storage[IGDBServiceKey.self] = igdbService
-    app.storage[FirebaseAPIKey.self] = firebaseApiKey
+
+    app.storage[FirebaseConfigKey.self] = FirebaseConfig(
+        apiKey: Environment.get("FIREBASE_API_KEY") ?? "",
+        appId: Environment.get("FIREBASE_APP_ID") ?? "",
+        gcmSenderId: Environment.get("FIREBASE_GCM_SENDER_ID") ?? "",
+        projectId: Environment.get("FIREBASE_PROJECT_ID") ?? "",
+        storageBucket: Environment.get("FIREBASE_STORAGE_BUCKET")
+    )
 
     // MARK: - Health Check (중복이지만 예시로 유지)
     app.get("health") { _ in
