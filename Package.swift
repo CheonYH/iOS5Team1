@@ -17,6 +17,7 @@ let package = Package(
     platforms: [
        .macOS(.v13)
     ],
+    // NOTE: SwiftOpenIDConnect는 사용하지 않습니다. Vapor JWT / JWTKit으로 대체되어 있습니다.
     dependencies: [
         // 💧 Vapor: 서버사이드 Swift 웹 프레임워크
         .package(url: "https://github.com/vapor/vapor.git", from: "4.115.0"),
@@ -27,7 +28,8 @@ let package = Package(
         // 🔵 SwiftNIO: 논블로킹 네트워킹 라이브러리(실행기 등에서 사용)
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🔐 JWT: JSON Web Token(토큰 기반 인증) 라이브러리
-        .package(url: "https://github.com/vapor/jwt.git", from: "5.0.0")
+        .package(url: "https://github.com/vapor/jwt.git", from: "5.0.0"),
+        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0")
     ],
     targets: [
         // 실행 타깃: 서버 앱 본체
@@ -39,7 +41,8 @@ let package = Package(
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "JWT", package: "jwt")
+                .product(name: "JWT", package: "jwt"),
+                .product(name: "JWTKit", package: "jwt-kit")
             ],
             swiftSettings: swiftSettings
         ),

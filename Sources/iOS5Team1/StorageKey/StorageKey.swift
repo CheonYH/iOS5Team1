@@ -42,3 +42,7 @@ enum FirebaseAPIKey: StorageKey {
 enum IGDBServiceKey: StorageKey {
     typealias Value = IGDBService
 }
+
+struct SocialAuthServiceKey: StorageKey {
+    typealias Value = SocialAuthService
+}

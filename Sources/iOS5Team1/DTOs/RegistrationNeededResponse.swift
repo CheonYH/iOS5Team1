@@ -8,5 +8,5 @@
 import Vapor
 
 struct RegistrationNeededResponse: Content {
-    let email: String
+    let email: String?
 }

@@ -10,12 +10,22 @@
 
 import Vapor
 
+
+enum SocialAuthError: Error {
+    case registrationNeeded(email: String)
+    case invalidToken
+    case unsupportedProvider
+}
+
+
 struct AuthController: RouteCollection, Sendable {
 
     /// 인증 관련 비즈니스 로직을 수행하는 서비스
     let authService: any AuthService
     /// 사용자 정보를 DB에서 관리하는 리포지토리
     let users: any UserRepository
+
+    let socialAuthService: SocialAuthService
 
     /// 이 컨트롤러에서 제공하는 라우트들을 등록합니다.
     func boot(routes: any RoutesBuilder) throws {
@@ -78,41 +88,51 @@ struct AuthController: RouteCollection, Sendable {
     }
 
     func socialLogin(req: Request) async throws -> Response {
-        let body = try req.content.decode(SocialLoginRequest.self)
+        let body = try req.content.decode(SocialIdTokenLoginRequest.self)
+        let provider = body.provider
 
-        // 기존 유저 검색
-        if let user = try await users.findByProvider(
-            uid: body.providerUid,
-            provider: body.provider
-        ) {
-            // 바로 로그인
+        let verified = try await socialAuthService.verifySocial(
+            req: req,
+            provider: provider,
+            idToken: body.idToken
+        )
+
+        if let user = try await users.findByProvider(uid: verified.uid, provider: provider.rawValue) {
             let tokens = try await authService.createTokenPair(req: req, userId: user.id)
-            return try await tokens.encodeResponse(for: req)
+            return Response(status: .ok, body: .init(data: try JSONEncoder().encode(tokens)))
         }
 
-        // 신규 → 닉네임 입력 필요
-        let response = RegistrationNeededResponse(email: body.email ?? "")
-        return try await response.encodeResponse(status: .accepted, for: req)
+        let json = [
+            "status": "registration_needed",
+            "provider": provider.rawValue,
+            "providerUid": verified.uid,
+            "email": verified.email ?? NSNull()
+        ] as [String: Any]
+
+        return Response(
+            status: .accepted,
+            body: .init(data: try JSONSerialization.data(withJSONObject: json))
+        )
     }
 
 
-    func socialRegister(req: Request) async throws -> Response {
+    func socialRegister(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(SocialRegisterRequest.self)
 
-        if try await users.exists(email: body.email) {
-            throw Abort(.conflict, reason: "email already exists")
+        guard let provider = SocialProvider(rawValue: body.provider) else {
+            throw Abort(.badRequest, reason: "Invalid provider")
         }
 
-        let user = try await authService.createSocial(
+        let user = try await users.createSocial(
             email: body.email,
-            provider: body.provider,
+            provider: provider.rawValue,
             providerUid: body.providerUid,
             nickname: body.nickname
         )
 
-        let tokens = try await authService.createTokenPair(req: req, userId: user.id)
-        return try await tokens.encodeResponse(for: req)
+        return try await authService.createTokenPair(req: req, userId: user.id)
     }
+
 
 }
 

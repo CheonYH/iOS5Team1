@@ -19,8 +19,8 @@ import Vapor
 /// 컨트롤러를 생성하고 `app.register(collection:)`으로 묶어 주입합니다.
 func routes(_ app: Application) throws {
 
-    // Health Check 라우트: 서버 상태 확인용
-    app.get("health") { req async -> String in
+    // Health Check
+    app.get("health") { _ async -> String in
         return "OK"
     }
 
@@ -31,9 +31,16 @@ func routes(_ app: Application) throws {
     guard let users = app.storage[UserRepositoryKey.self] else {
         fatalError("UserRepository not registered")
     }
+    guard let socialAuthService = app.storage[SocialAuthServiceKey.self] else {
+        fatalError("SocialAuthService not registered")
+    }
 
     // Auth 컨트롤러 등록
-    let authController = AuthController(authService: authService, users: users)
+    let authController = AuthController(
+        authService: authService,
+        users: users,
+        socialAuthService: socialAuthService
+    )
     try app.register(collection: authController)
 
     // MARK: - Review 관련 의존성 꺼내기
@@ -41,11 +48,12 @@ func routes(_ app: Application) throws {
         fatalError("ReviewService not registered")
     }
 
-    // Review 컨트롤러 등록
     let reviewController = ReviewController(service: reviewService)
     try app.register(collection: reviewController)
 
+    // 추가 컨트롤러
     try app.register(collection: IGDBController())
     try app.register(collection: FirebaseController())
 }
+
 

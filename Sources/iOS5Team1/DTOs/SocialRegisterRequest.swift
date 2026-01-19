@@ -11,5 +11,5 @@ struct SocialRegisterRequest: Content {
     let provider: String
     let providerUid: String
     let nickname: String
-    let email: String
+    let email: String?
 }
