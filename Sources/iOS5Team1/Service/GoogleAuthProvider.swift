@@ -7,6 +7,13 @@
 
 import Vapor
 
+/// Google ID Token 검증 제공자입니다.
+///
+/// - Composition:
+///     - jwks: Google 공개키(JWKS) 검증 유틸
+///     - expectedAud: 허용할 Client ID
+/// - Important:
+///     - aud 불일치 시 인증을 거부합니다.
 actor GoogleAuthProvider: SocialAuthProvider {
     private let jwks: GoogleJWKSManager
     private let expectedAud: String
@@ -31,7 +38,6 @@ actor GoogleAuthProvider: SocialAuthProvider {
         )
     }
 }
-
 
 
 

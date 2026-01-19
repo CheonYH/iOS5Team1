@@ -7,6 +7,13 @@
 import Vapor
 
 
+/// 소셜 로그인/가입 흐름을 처리하는 서비스입니다.
+///
+/// - Composition:
+///     - providers: 제공자별 검증 로직 맵
+///     - users/refreshTokens: 사용자/토큰 저장소
+/// - Important:
+///     - 신규 사용자는 가입 필요 응답으로 분기됩니다.
 actor SocialAuthService {
     private let users: any UserRepository
     private let refreshTokens: any RefreshTokenRepository
@@ -71,6 +78,5 @@ actor SocialAuthService {
         return try await verifier.verify(req: req, idToken: idToken)
     }
 }
-
 
 

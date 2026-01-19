@@ -15,6 +15,7 @@ import Fluent
 import FluentMySQLDriver
 import Vapor
 import JWT
+import JWTKit
 import SQLKit
 
 public func configure(_ app: Application) async throws {
@@ -88,6 +89,17 @@ public func configure(_ app: Application) async throws {
         let generated = generateJWTSecret()
         let key = HMACKey(from: Data(base64Encoded: generated)!)
         await app.jwt.keys.add(hmac: key, digestAlgorithm: .sha256)
+    }
+
+    do {
+        let jwksURI = URI(string: "https://www.googleapis.com/oauth2/v3/certs")
+        let jwksResponse = try await app.client.get(jwksURI)
+        let jwks: JWKS = try jwksResponse.content.decode(JWKS.self)
+        try await app.jwt.keys.add(jwks: jwks)
+        print("[JWT] Loaded Google JWKS")
+    } catch {
+        app.logger.error("Failed to load Google JWKS: \(error)")
+        throw error
     }
 
     let userRepo = MySQLUserRepository(db: sql)
