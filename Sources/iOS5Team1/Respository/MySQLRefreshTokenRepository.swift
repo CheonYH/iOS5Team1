@@ -16,13 +16,30 @@ struct MySQLRefreshTokenRepository: RefreshTokenRepository {
     let db: any SQLDatabase
 
     /// 새 리프레시 토큰을 저장합니다.
-    func create(userId: Int, token: String, expiresAt: Date) async throws {
+    func create(
+        userId: Int,
+        token: String,
+        expiresAt: Date,
+        deviceID: String?,
+        userAgent: String?,
+        ip: String?,
+        platform: String?
+    ) async throws {
         try await db.raw("""
-            INSERT INTO refresh_tokens (user_id, token, expires_at)
-            VALUES (\(bind: userId), \(bind: token), \(bind: expiresAt))
-            """)
-            .run()
+            INSERT INTO refresh_tokens
+                (user_id, token, expires_at, device_id, user_agent, ip, platform)
+            VALUES (
+                \(bind: userId),
+                \(bind: token),
+                \(bind: expiresAt),
+                \(bind: deviceID),
+                \(bind: userAgent),
+                \(bind: ip),
+                \(bind: platform)
+            )
+        """).run()
     }
+
 
     /// 특정 토큰을 삭제합니다(로그아웃 등).
     func delete(_ token: String) async throws {
@@ -45,22 +62,66 @@ struct MySQLRefreshTokenRepository: RefreshTokenRepository {
     /// 토큰 문자열로 리프레시 토큰 정보를 조회합니다.
     func find(_ token: String) async throws -> RefreshToken? {
         let rows = try await db.raw("""
-            SELECT id, user_id, token, expires_at, created_at, updated_at
+            SELECT id, user_id, token,
+                   device_id, user_agent, ip,
+                   used_at, revoked_at,
+                   expires_at, created_at, updated_at,
+                   platform
             FROM refresh_tokens
             WHERE token = \(bind: token)
             LIMIT 1
-            """)
-            .all()
+        """).all()
 
         guard let row = rows.first else { return nil }
 
-        return RefreshToken(
-            id: try row.decode(column: "id", as: Int.self),
-            userId: try row.decode(column: "user_id", as: Int.self),
-            token: try row.decode(column: "token", as: String.self),
-            expiresAt: try row.decode(column: "expires_at", as: Date.self),
-            createdAt: try row.decode(column: "created_at", as: Date?.self),
-            updatedAt: try row.decode(column: "updated_at", as: Date?.self)
+        return try RefreshToken(
+            id: row.decode(column: "id", as: Int.self),
+            userId: row.decode(column: "user_id", as: Int.self),
+            token: row.decode(column: "token", as: String.self),
+            deviceID: row.decode(column: "device_id", as: String?.self),
+            userAgent: row.decode(column: "user_agent", as: String?.self),
+            ip: row.decode(column: "ip", as: String?.self),
+            platform: row.decode(column: "platform", as: String?.self),
+            usedAt: row.decode(column: "used_at", as: Date?.self),
+            revokedAt: row.decode(column: "revoked_at", as: Date?.self),
+            expiresAt: row.decode(column: "expires_at", as: Date.self),
+            createdAt: row.decode(column: "created_at", as: Date.self),
+            updatedAt: row.decode(column: "updated_at", as: Date?.self)
         )
     }
+
+
+    func markUsed(_ token: String) async throws {
+        try await db.raw("""
+            UPDATE refresh_tokens
+            SET used_at = CURRENT_TIMESTAMP
+            WHERE token = \(bind: token)
+        """).run()
+    }
+
+    func revoke(_ token: String) async throws {
+        try await db.raw("""
+            UPDATE refresh_tokens
+            SET revoked_at = CURRENT_TIMESTAMP
+            WHERE token = \(bind: token)
+        """).run()
+    }
+
+    func revokeAll(for userId: Int) async throws {
+        try await db.raw("""
+            UPDATE refresh_tokens
+            SET revoked_at = CURRENT_TIMESTAMP
+            WHERE user_id = \(bind: userId)
+        """).run()
+    }
+
+    func cleanupExpired() async throws {
+        try await db.raw("""
+            DELETE FROM refresh_tokens
+            WHERE expires_at < CURRENT_TIMESTAMP
+               OR revoked_at IS NOT NULL
+        """).run()
+    }
+
+
 }

@@ -13,7 +13,16 @@ struct RefreshToken: Sendable {
     let id: Int
     let userId: Int
     let token: String
+
+    let deviceID: String?
+    let userAgent: String?
+    let ip: String?
+    let platform: String?
+
+    let usedAt: Date?
+    let revokedAt: Date?
     let expiresAt: Date
-    let createdAt: Date?
+    let createdAt: Date
     let updatedAt: Date?
 }
+

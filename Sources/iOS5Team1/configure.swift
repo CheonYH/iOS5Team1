@@ -107,7 +107,7 @@ public func configure(_ app: Application) async throws {
     // MARK: - Repository / Service 의존성 주입
     let userRepo = MySQLUserRepository(db: sql)
     let refreshRepo = MySQLRefreshTokenRepository(db: sql)
-    let reviewRepo = MySQLReviewRepository(database: sql)
+    let reviewRepo = MySQLReviewRepository(db: sql)
 
     app.storage[UserRepositoryKey.self] = userRepo
     app.storage[RefreshTokenRepositoryKey.self] = refreshRepo
@@ -165,4 +165,14 @@ func generateJWTSecret() -> String {
     fread(&bytes, 1, bytes.count, fd)
     fclose(fd)
     return Data(bytes).base64EncodedString()
+}
+
+extension Application {
+    var googleOAuth: GoogleOAuthConfig {
+        .init(
+            clientId: Environment.get("GOOGLE_OAUTH_CLIENT_ID")!,
+            clientSecret: Environment.get("GOOGLE_OAUTH_CLIENT_SECRET")!,
+            redirectURI: Environment.get("GOOGLE_OAUTH_REDIRECT_URI")!
+        )
+    }
 }

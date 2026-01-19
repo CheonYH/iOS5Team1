@@ -35,7 +35,7 @@ struct ReviewController: RouteCollection, Sendable {
     func create(req: Request) async throws -> ReviewResponse {
         // 토큰에서 사용자 ID 추출
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
-        guard let userId = Int(payload.subject.value) else {
+        guard let userId = Int(payload.sub.value) else {
             throw Abort(.unauthorized, reason: "Invalid token payload")
         }
 
@@ -48,7 +48,7 @@ struct ReviewController: RouteCollection, Sendable {
     /// 리뷰 수정
     func update(req: Request) async throws -> HTTPStatus {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
-        guard let userId = Int(payload.subject.value) else {
+        guard let userId = Int(payload.sub.value) else {
             throw Abort(.unauthorized)
         }
 
@@ -62,7 +62,7 @@ struct ReviewController: RouteCollection, Sendable {
     /// 리뷰 삭제
     func delete(req: Request) async throws -> HTTPStatus {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
-        guard let userId = Int(payload.subject.value) else {
+        guard let userId = Int(payload.sub.value) else {
             throw Abort(.unauthorized)
         }
 
@@ -74,7 +74,7 @@ struct ReviewController: RouteCollection, Sendable {
     /// 내 리뷰 목록 조회
     func fetchByUser(req: Request) async throws -> [ReviewResponse] {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
-        guard let userId = Int(payload.subject.value) else {
+        guard let userId = Int(payload.sub.value) else {
             throw Abort(.unauthorized)
         }
         return try await service.fetchByUser(userId: userId)

@@ -11,13 +11,11 @@ import Foundation
 import JWT
 
 struct AccessTokenPayload: JWTPayload {
-    /// 토큰 소유자(사용자)의 고유 식별자
-    var subject: SubjectClaim
-    /// 토큰 만료 시각
-    var expiration: ExpirationClaim
+    let sub: SubjectClaim
+    let exp: ExpirationClaim
+    var iat: IssuedAtClaim
 
-    /// 토큰이 아직 유효한지 검사합니다.
-    func verify(using algorithm: some JWTAlgorithm) async throws {
-        try self.expiration.verifyNotExpired()
+    func verify(using algorithm: some JWTAlgorithm) throws {
+        try exp.verifyNotExpired()
     }
 }

@@ -24,3 +24,5 @@ struct ReviewResponse: Content {
     /// 수정 시각(수정 전이면 nil)
     let updatedAt: Date?
 }
+
+

@@ -29,7 +29,7 @@ struct IGDBController: RouteCollection {
         let clientRes = try await req.client.send(igdbReq)
 
         // Server Response 생성
-        var res = Response(status: clientRes.status)
+        let res = Response(status: clientRes.status)
         res.headers = clientRes.headers
 
         if let buffer = clientRes.body {
@@ -54,7 +54,7 @@ struct IGDBController: RouteCollection {
         let clientRes = try await req.client.send(igdbReq)
 
         // Server Response 생성
-        var res = Response(status: clientRes.status)
+        let res = Response(status: clientRes.status)
         res.headers = clientRes.headers
 
         if let buffer = clientRes.body {

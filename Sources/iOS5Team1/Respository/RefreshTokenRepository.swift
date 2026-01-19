@@ -11,12 +11,29 @@ import Foundation
 import SQLKit
 
 protocol RefreshTokenRepository: Sendable {
-    /// 새 리프레시 토큰 저장
-    func create(userId: Int, token: String, expiresAt: Date) async throws
-    /// 특정 토큰 삭제
-    func delete(_ token: String) async throws
-    /// 특정 사용자의 모든 토큰 삭제
-    func deleteAll(for userId: Int) async throws
-    /// 토큰 문자열로 조회
+    func create(
+        userId: Int,
+        token: String,
+        expiresAt: Date,
+        deviceID: String?,
+        userAgent: String?,
+        ip: String?,
+        platform: String?
+    ) async throws
+
     func find(_ token: String) async throws -> RefreshToken?
+
+    func markUsed(_ token: String) async throws
+
+    func revoke(_ token: String) async throws
+
+    func revokeAll(for userId: Int) async throws
+
+    func delete(_ token: String) async throws
+
+    func deleteAll(for userId: Int) async throws
+
+    func cleanupExpired() async throws
 }
+
+
