@@ -74,5 +74,43 @@ struct AuthController: RouteCollection, Sendable {
 
         return .init(available: !exists)
     }
+
+    func socialLogin(req: Request) async throws -> Response {
+        let body = try req.content.decode(SocialLoginRequest.self)
+
+        // 기존 유저 검색
+        if let user = try await users.findByProvider(
+            uid: body.providerUid,
+            provider: body.provider
+        ) {
+            // 바로 로그인
+            let tokens = try await authService.createTokenPair(req: req, userId: user.id)
+            return try await tokens.encodeResponse(for: req)
+        }
+
+        // 신규 → 닉네임 입력 필요
+        let response = RegistrationNeededResponse(email: body.email ?? "")
+        return try await response.encodeResponse(status: .accepted, for: req)
+    }
+
+
+    func socialRegister(req: Request) async throws -> Response {
+        let body = try req.content.decode(SocialRegisterRequest.self)
+
+        if try await users.exists(email: body.email) {
+            throw Abort(.conflict, reason: "email already exists")
+        }
+
+        let user = try await authService.createSocial(
+            email: body.email,
+            provider: body.provider,
+            providerUid: body.providerUid,
+            nickname: body.nickname
+        )
+
+        let tokens = try await authService.createTokenPair(req: req, userId: user.id)
+        return try await tokens.encodeResponse(for: req)
+    }
+
 }
 

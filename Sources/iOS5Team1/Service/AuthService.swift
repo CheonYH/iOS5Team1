@@ -22,4 +22,8 @@ protocol AuthService: Sendable {
 
     /// 리프레시 토큰을 폐기(로그아웃)합니다.
     func logout(refreshToken: String) async throws
+
+    func createTokenPair(req: Request, userId: Int) async throws -> TokenPair
+
+    func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User
 }

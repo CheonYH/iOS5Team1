@@ -32,20 +32,23 @@ actor MyAuthService: AuthService {
 
     /// 로그인 처리: 자격 증명 확인 후 토큰 쌍 발급
     func login(req: Request, email: String, password: String) async throws -> TokenPair {
-        // 1) 이메일로 사용자 조회
         guard let user = try await users.findByEmail(email) else {
             throw Abort(.unauthorized, reason: "email not found")
         }
 
-        // 2) 비밀번호 검증
-        guard try Bcrypt.verify(password, created: user.password) else {
+        guard user.password != nil else {
+            throw Abort(.forbidden, reason: "this account uses social login")
+        }
+
+        guard let hashed = user.password else {
+            throw Abort(.forbidden, reason: "This account uses social login.")
+        }
+
+        guard try Bcrypt.verify(password, created: hashed) else {
             throw Abort(.unauthorized, reason: "invalid password")
         }
 
-        // 3) 액세스 토큰 생성
         let access = try await generateAccessToken(req: req, userId: user.id)
-
-        // 4) 리프레시 토큰 생성 및 저장
         let refresh = generateRefreshToken()
         let expires = Date().addingTimeInterval(refreshTTL)
 
@@ -121,5 +124,25 @@ actor MyAuthService: AuthService {
 
         return .created
     }
+
+    func createTokenPair(req: Request, userId: Int) async throws -> TokenPair {
+        let access = try await generateAccessToken(req: req, userId: userId)
+        let refresh = generateRefreshToken()
+        let expires = Date().addingTimeInterval(refreshTTL)
+
+        try await refreshTokens.create(userId: userId, token: refresh, expiresAt: expires)
+
+        return TokenPair(access: access, refresh: refresh)
+    }
+
+    func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User {
+        return try await users.createSocial(
+            email: email,
+            provider: provider,
+            providerUid: providerUid,
+            nickname: nickname
+        )
+    }
+
 }
 

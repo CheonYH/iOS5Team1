@@ -7,11 +7,14 @@
 
 import Foundation
 
-struct User {
+struct User: Decodable {
     let id: Int
-    let email: String
-    let password: String
+    let email: String?
+    let password: String?        // 소셜은 null
     let nickname: String
+    let provider: String?        // local/google/apple 등
+    let providerUid: String?     // UID
     let createdAt: Date?
     let updatedAt: Date?
 }
+

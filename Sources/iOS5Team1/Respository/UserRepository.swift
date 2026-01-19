@@ -19,5 +19,10 @@ protocol UserRepository: Sendable {
     func create(email: String, password: String, nickname: String) async throws -> User
     /// 이메일로 사용자 조회
     func findByEmail(_ email: String) async throws -> User?
+
+    func findByProvider(uid: String, provider: String) async throws -> User?
+
+    func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User
+
 }
 

@@ -12,8 +12,10 @@
 
 import Foundation
 import SQLKit
+import Vapor
 
 actor MySQLUserRepository: UserRepository {
+
 
     /// SQL 실행에 사용할 데이터베이스 핸들
     let db: any SQLDatabase
@@ -32,9 +34,11 @@ actor MySQLUserRepository: UserRepository {
 
         return User(
             id: try row.decode(column: "id", as: Int.self),
-            email: try row.decode(column: "email", as: String.self),
-            password: try row.decode(column: "password", as: String.self),
+            email: try row.decode(column: "email", as: String?.self),
+            password: try row.decode(column: "password", as: String?.self),
             nickname: try row.decode(column: "nickname", as: String.self),
+            provider: try row.decode(column: "provider", as: String.self),
+            providerUid: try row.decode(column: "provider_uid", as: String.self),
             createdAt: try row.decode(column: "created_at", as: Date?.self),
             updatedAt: try row.decode(column: "updated_at", as: Date?.self)
         )
@@ -81,6 +85,56 @@ actor MySQLUserRepository: UserRepository {
 
         return user
     }
+
+    func findByProvider(uid: String, provider: String) async throws -> User? {
+        let rows = try await db.raw("""
+            SELECT id, email, password, nickname, provider, provider_uid, created_at, updated_at
+            FROM users
+            WHERE provider = \(bind: provider) AND provider_uid = \(bind: uid)
+            LIMIT 1
+        """).all()
+
+        guard let row = rows.first else { return nil }
+
+        return User(
+            id: try row.decode(column: "id", as: Int.self),
+            email: try row.decode(column: "email", as: String?.self),
+            password: try row.decode(column: "password", as: String?.self),
+            nickname: try row.decode(column: "nickname", as: String.self),
+            provider: try row.decode(column: "provider", as: String.self),
+            providerUid: try row.decode(column: "provider_uid", as: String.self),
+            createdAt: try row.decode(column: "created_at", as: Date?.self),
+            updatedAt: try row.decode(column: "updated_at", as: Date?.self)
+        )
+    }
+
+
+
+    func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User {
+
+        let rows = try await db.raw("""
+            INSERT INTO users (email, provider, provider_uid, nickname)
+            VALUES (\(bind: email), \(bind: provider), \(bind: providerUid), \(bind: nickname))
+            RETURNING id, email, provider, provider_uid, nickname, created_at, updated_at
+        """).all()
+
+        guard let row = rows.first else {
+            throw Abort(.internalServerError, reason: "failed to create user")
+        }
+
+        return User(
+            id: try row.decode(column: "id", as: Int.self),
+            email: try row.decode(column: "email", as: String?.self),
+            password: nil,
+            nickname: try row.decode(column: "nickname", as: String.self),
+            provider: try row.decode(column: "provider", as: String.self),
+            providerUid: try row.decode(column: "provider_uid", as: String.self),
+            createdAt: try? row.decode(column: "created_at", as: Date.self),
+            updatedAt: try? row.decode(column: "updated_at", as: Date.self)
+        )
+    }
+
+
 
     /// 의존성 주입을 위한 생성자
     init(db: any SQLDatabase) {
