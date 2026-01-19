@@ -1,18 +1,30 @@
+//  routes.swift
+//  iOS5Team1
+//
+//  전역 라우트를 등록하는 파일입니다.
+//  각 컨트롤러에서 제공하는 API 엔드포인트를 서버에 연결합니다.
+//
+//  초보자 가이드
+//  - 라우트(Route): URL + HTTP 메서드(GET/POST 등)와 실행 코드를 연결하는 규칙
+//  - /health: 서버가 살아있는지 확인하는 간단한 엔드포인트
+//  - app.storage: 서버 부팅 시 등록한 의존성(서비스/리포지토리)을 꺼내 쓰는 저장소
+
 import Fluent
 import FluentMySQLDriver
 import MySQLKit
 import SQLKit
 import Vapor
 
-
+/// 앱의 모든 라우트를 등록합니다.
+/// 컨트롤러를 생성하고 `app.register(collection:)`으로 묶어 주입합니다.
 func routes(_ app: Application) throws {
 
-
+    // Health Check 라우트: 서버 상태 확인용
     app.get("health") { req async -> String in
         return "OK"
     }
 
-    // Auth Dependencies
+    // MARK: - Auth 관련 의존성 꺼내기
     guard let authService = app.storage[AuthServiceKey.self] else {
         fatalError("AuthService not registered")
     }
@@ -20,16 +32,20 @@ func routes(_ app: Application) throws {
         fatalError("UserRepository not registered")
     }
 
+    // Auth 컨트롤러 등록
     let authController = AuthController(authService: authService, users: users)
     try app.register(collection: authController)
 
-    // Review Dependencies
+    // MARK: - Review 관련 의존성 꺼내기
     guard let reviewService = app.storage[ReviewServiceKey.self] else {
         fatalError("ReviewService not registered")
     }
 
+    // Review 컨트롤러 등록
     let reviewController = ReviewController(service: reviewService)
     try app.register(collection: reviewController)
-}
 
+    try app.register(collection: IGDBController())
+    try app.register(collection: FirebaseController())
+}
 

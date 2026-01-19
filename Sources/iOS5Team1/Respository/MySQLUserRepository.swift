@@ -2,16 +2,23 @@
 //  MySQLUserRepository.swift
 //  iOS5Team1
 //
-//  Created by cheon on 1/10/26.
+//  MySQL 데이터베이스에서 사용자(User) 정보를 관리하는 리포지토리입니다.
+//  이메일로 조회, 중복 확인, 생성 등을 담당합니다.
 //
+//  초보자 가이드
+//  - Repository: DB와 직접 통신하는 계층. 쿼리를 캡슐화하여 상위 레이어가 쉽게 사용하도록 합니다.
+//  - actor: 동시성(Concurrency)에서 데이터 경쟁을 막기 위해 순차적으로 실행되는 타입입니다.
+//  - SQLKit: Swift에서 SQL을 안전하게 작성/실행할 수 있는 라이브러리입니다.
 
 import Foundation
 import SQLKit
 
 actor MySQLUserRepository: UserRepository {
 
+    /// SQL 실행에 사용할 데이터베이스 핸들
     let db: any SQLDatabase
 
+    /// 이메일로 사용자 1명을 조회합니다. 없으면 nil 반환
     func findByEmail(_ email: String) async throws -> User? {
         let rows = try await db.raw("""
             SELECT id, email, password, nickname, created_at, updated_at
@@ -33,6 +40,7 @@ actor MySQLUserRepository: UserRepository {
         )
     }
 
+    /// 이메일 중복 여부 확인
     func exists(email: String) async throws -> Bool {
         let rows = try await db.raw("""
             SELECT EXISTS(SELECT 1 FROM users WHERE email = \(bind: email)) AS user_exists
@@ -45,6 +53,7 @@ actor MySQLUserRepository: UserRepository {
         return try row.decode(column: "user_exists", as: Bool.self)
     }
 
+    /// 닉네임 중복 여부 확인
     func exists(nickname: String) async throws -> Bool {
         let rows = try await db.raw("""
             SELECT EXISTS(SELECT 1 FROM users WHERE nickname = \(bind: nickname)) AS nickname_exists
@@ -57,6 +66,7 @@ actor MySQLUserRepository: UserRepository {
         return try row.decode(column: "nickname_exists", as: Bool.self)
     }
 
+    /// 사용자 생성 후, 방금 생성한 사용자 정보를 반환합니다.
     func create(email: String, password: String, nickname: String) async throws -> User {
         try await db.raw("""
             INSERT INTO users (email, password, nickname)
@@ -64,7 +74,7 @@ actor MySQLUserRepository: UserRepository {
             """)
         .run()
 
-        // 방금 생성한 유저 다시 조회
+        // 방금 생성한 유저 다시 조회(정합성 확보)
         guard let user = try await findByEmail(email) else {
             throw RepositoryError.insertFailed
         }
@@ -72,9 +82,9 @@ actor MySQLUserRepository: UserRepository {
         return user
     }
 
+    /// 의존성 주입을 위한 생성자
     init(db: any SQLDatabase) {
         self.db = db
     }
 }
-
 
