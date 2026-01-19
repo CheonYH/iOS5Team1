@@ -28,8 +28,7 @@ let package = Package(
         // 🔵 SwiftNIO: 논블로킹 네트워킹 라이브러리(실행기 등에서 사용)
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
         // 🔐 JWT: JSON Web Token(토큰 기반 인증) 라이브러리
-        .package(url: "https://github.com/vapor/jwt.git", from: "5.0.0"),
-        .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.0.0")
+        .package(url: "https://github.com/vapor/jwt.git", from: "5.1.2"),
     ],
     targets: [
         // 실행 타깃: 서버 앱 본체
@@ -42,7 +41,6 @@ let package = Package(
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
                 .product(name: "JWT", package: "jwt"),
-                .product(name: "JWTKit", package: "jwt-kit")
             ],
             swiftSettings: swiftSettings
         ),
