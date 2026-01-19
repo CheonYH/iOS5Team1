@@ -25,6 +25,8 @@ struct AuthController: RouteCollection, Sendable {
         auth.post("refresh", use: refresh)        // POST /auth/refresh
         auth.post("logout", use: logout)          // POST /auth/logout
         auth.post("nickname-check", use: checkNickname) // POST /auth/nickname-check
+        auth.post("social", use: socialLogin)
+        auth.post("social-register", use: socialRegister)
     }
 
     /// 회원가입 처리
