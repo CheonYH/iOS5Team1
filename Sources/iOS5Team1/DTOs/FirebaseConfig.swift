@@ -13,6 +13,7 @@ struct FirebaseConfig: Content {
     let gcmSenderId: String
     let projectId: String
     let storageBucket: String?
+    let clientId: String
 }
 
 struct FirebaseConfigKey: StorageKey {

@@ -124,12 +124,23 @@ public func configure(_ app: Application) async throws {
     app.storage[ReviewServiceKey.self] = reviewService
     app.storage[IGDBServiceKey.self] = igdbService
 
+    guard
+        let apiKey = Environment.get("FIREBASE_API_KEY"),
+        let appId = Environment.get("FIREBASE_APP_ID"),
+        let gcmSenderId = Environment.get("FIREBASE_GCM_SENDER_ID"),
+        let projectId = Environment.get("FIREBASE_PROJECT_ID"),
+        let clientId = Environment.get("FIREBASE_CLIENT_ID")
+    else {
+        throw Abort(.internalServerError, reason: "Missing required Firebase ENV variables")
+    }
+
     app.storage[FirebaseConfigKey.self] = FirebaseConfig(
-        apiKey: Environment.get("FIREBASE_API_KEY") ?? "",
-        appId: Environment.get("FIREBASE_APP_ID") ?? "",
-        gcmSenderId: Environment.get("FIREBASE_GCM_SENDER_ID") ?? "",
-        projectId: Environment.get("FIREBASE_PROJECT_ID") ?? "",
-        storageBucket: Environment.get("FIREBASE_STORAGE_BUCKET")
+        apiKey: apiKey,
+        appId: appId,
+        gcmSenderId: gcmSenderId,
+        projectId: projectId,
+        storageBucket: Environment.get("FIREBASE_STORAGE_BUCKET"),
+        clientId: clientId
     )
 
     // MARK: - Health Check (중복이지만 예시로 유지)

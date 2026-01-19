@@ -19,7 +19,8 @@ struct FirebaseController: RouteCollection {
                 appId: cfg.appId,
                 gcmSenderId: cfg.gcmSenderId,
                 projectId: cfg.projectId,
-                storageBucket: cfg.storageBucket
+                storageBucket: cfg.storageBucket,
+                clientId: cfg.clientId
             )
         }
     }
