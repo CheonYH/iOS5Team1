@@ -10,6 +10,12 @@
 import Vapor
 
 /// 리뷰 통계를 클라이언트로 전달할 때 사용하는 응답 모델
+/// 리뷰 통계 응답 DTO입니다.
+///
+/// - Composition:
+///     - gameId/averageRating/reviewCount
+/// - Important:
+///     - 평균 평점은 소수점 값을 포함합니다.
 struct ReviewStatsResponse: Content {
     /// 게임 식별자
     let gameId: Int

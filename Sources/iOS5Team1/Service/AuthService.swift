@@ -12,7 +12,12 @@ import Foundation
 import SQLKit
 import Vapor
 
-/// 인증 서비스가 가져야 할 기능을 정의합니다.
+/// 인증 서비스 인터페이스입니다.
+///
+/// - Composition:
+///     - login/refresh/logout/createTokenPair/createSocial
+/// - Important:
+///     - 구현체가 실제 인증 정책을 결정합니다.
 protocol AuthService: Sendable {
     /// 이메일/비밀번호로 로그인하여 토큰 쌍을 발급합니다.
     func login(req: Request, email: String, password: String) async throws -> TokenPair

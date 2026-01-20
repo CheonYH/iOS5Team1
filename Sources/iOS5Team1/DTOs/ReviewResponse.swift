@@ -8,6 +8,14 @@
 
 import Vapor
 
+/// 리뷰 상세 응답 DTO입니다.
+///
+/// - Composition:
+///     - id/userId/gameId: 식별자
+///     - rating/content: 리뷰 내용
+///     - createdAt/updatedAt: 타임스탬프
+/// - Important:
+///     - updatedAt은 수정 전에는 nil일 수 있습니다.
 struct ReviewResponse: Content {
     /// 리뷰 고유 식별자
     let id: Int
@@ -24,5 +32,4 @@ struct ReviewResponse: Content {
     /// 수정 시각(수정 전이면 nil)
     let updatedAt: Date?
 }
-
 

@@ -9,6 +9,13 @@
 
 import Foundation
 
+/// 사용자 정보를 표현하는 모델입니다.
+///
+/// - Composition:
+///     - email/password: 로컬 로그인용 필드
+///     - provider/providerUid: 소셜 로그인 식별 필드
+/// - Important:
+///     - 소셜 로그인 계정은 password가 nil입니다.
 struct User: Decodable {
     let id: Int
     let email: String?

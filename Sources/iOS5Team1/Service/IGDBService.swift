@@ -9,6 +9,13 @@
 
 import Vapor
 
+/// IGDB OAuth 토큰을 발급하고 캐시하는 서비스입니다.
+///
+/// - Composition:
+///     - clientId/clientSecret: IGDB 인증 정보
+///     - cachedToken: 만료 전까지 재사용되는 토큰 캐시
+/// - Important:
+///     - 만료 60초 전 갱신하도록 안전 마진을 둡니다.
 actor IGDBService {
     let clientId: String
     let clientSecret: String

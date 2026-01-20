@@ -15,12 +15,13 @@
 
 import Vapor
 
-/// 로그인 요청의 결과를 표현하는 응답 모델입니다.
+/// 로그인 결과 응답 DTO입니다.
 ///
-/// - Note:
-/// Vapor의 `Content` 프로토콜을 채택하면
-/// 자동으로 JSON <-> Swift 타입 변환이 가능해집니다.
-/// 서버는 이 타입을 사용해 JSON 응답을 쉽게 보낼 수 있습니다.
+/// - Composition:
+///     - success: 로그인 성공 여부
+///     - message: 사용자 안내 메시지
+/// - Important:
+///     - 상세 오류 사유는 message에 포함됩니다.
 struct LoginResponse: Content {
     /// 로그인 성공 여부
     /// - true: 로그인 성공

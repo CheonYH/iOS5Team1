@@ -10,39 +10,82 @@
 import Vapor
 import Foundation
 
-/// UserRepository를 저장/조회하기 위한 키
+/// UserRepository 저장 키입니다.
+///
+/// - Composition:
+///     - Value = any UserRepository
+/// - Important:
+///     - app.storage에서 동일 키로 접근합니다.
 enum UserRepositoryKey: StorageKey {
     typealias Value = any UserRepository
 }
 
-/// RefreshTokenRepository를 저장/조회하기 위한 키
+/// RefreshTokenRepository 저장 키입니다.
+///
+/// - Composition:
+///     - Value = any RefreshTokenRepository
+/// - Important:
+///     - 토큰 저장소는 전역에서 공유됩니다.
 enum RefreshTokenRepositoryKey: StorageKey {
     typealias Value = any RefreshTokenRepository
 }
 
-/// AuthService를 저장/조회하기 위한 키
+/// AuthService 저장 키입니다.
+///
+/// - Composition:
+///     - Value = MyAuthService
+/// - Important:
+///     - 인증 로직은 싱글 인스턴스로 관리됩니다.
 enum AuthServiceKey: StorageKey {
     typealias Value = MyAuthService
 }
 
-/// ReviewRepository를 저장/조회하기 위한 키
+/// ReviewRepository 저장 키입니다.
+///
+/// - Composition:
+///     - Value = any ReviewRepository
+/// - Important:
+///     - 리뷰 데이터 접근을 전역에서 공유합니다.
 enum ReviewRepositoryKey: StorageKey {
     typealias Value = any ReviewRepository
 }
 
-/// ReviewService를 저장/조회하기 위한 키
+/// ReviewService 저장 키입니다.
+///
+/// - Composition:
+///     - Value = any ReviewService
+/// - Important:
+///     - 서비스 구현체를 교체할 때 사용됩니다.
 enum ReviewServiceKey: StorageKey {
     typealias Value = any ReviewService
 }
 
+/// Firebase API 키 저장용 키입니다.
+///
+/// - Composition:
+///     - Value = String
+/// - Important:
+///     - 보안상 로깅/노출을 주의합니다.
 enum FirebaseAPIKey: StorageKey {
     typealias Value = String
 }
 
+/// IGDBService 저장 키입니다.
+///
+/// - Composition:
+///     - Value = IGDBService
+/// - Important:
+///     - IGDB 토큰 캐시를 공유합니다.
 enum IGDBServiceKey: StorageKey {
     typealias Value = IGDBService
 }
 
+/// SocialAuthService 저장 키입니다.
+///
+/// - Composition:
+///     - Value = SocialAuthService
+/// - Important:
+///     - 소셜 로그인 검증에 사용됩니다.
 struct SocialAuthServiceKey: StorageKey {
     typealias Value = SocialAuthService
 }

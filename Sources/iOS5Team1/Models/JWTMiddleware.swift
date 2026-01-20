@@ -9,6 +9,12 @@
 
 import Vapor
 
+/// JWT 검증을 수행하는 미들웨어입니다.
+///
+/// - Composition:
+///     - AccessTokenPayload 검증 로직
+/// - Important:
+///     - 실패 시 401 응답으로 요청을 차단합니다.
 struct JWTMiddleware: AsyncMiddleware {
     /// 요청을 가로채 JWT 토큰의 유효성을 검사합니다.
     /// 유효하면 다음 핸들러로 넘기고, 아니면 오류를 던집니다.

@@ -9,6 +9,12 @@
 import Vapor
 
 /// 클라이언트가 서버에 새 리뷰를 생성할 때 보내는 데이터 형식
+/// 리뷰 생성 요청 DTO입니다.
+///
+/// - Composition:
+///     - gameId/rating/content
+/// - Important:
+///     - rating 범위는 서버 정책에 따라 검증됩니다.
 struct CreateReviewRequest: Content {
     /// 대상 게임 식별자
     let gameId: Int

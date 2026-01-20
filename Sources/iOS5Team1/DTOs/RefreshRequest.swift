@@ -9,6 +9,12 @@
 import Vapor
 
 /// 토큰 재발급 요청에서 사용하는 데이터 형식
+/// 토큰 재발급 요청 DTO입니다.
+///
+/// - Composition:
+///     - refreshToken: 갱신용 리프레시 토큰 문자열
+/// - Important:
+///     - 만료/폐기된 토큰은 재발급에 사용할 수 없습니다.
 struct RefreshRequest: Content {
     /// 클라이언트가 보유한 리프레시 토큰 문자열
     let refreshToken: String

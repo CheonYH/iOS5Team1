@@ -11,6 +11,12 @@
 import SQLKit
 import Foundation
 
+/// MySQL 기반 리프레시 토큰 리포지토리 구현체입니다.
+///
+/// - Composition:
+///     - db: SQL 실행 핸들
+/// - Important:
+///     - 만료/폐기 토큰 정리는 cleanupExpired로 수행합니다.
 struct MySQLRefreshTokenRepository: RefreshTokenRepository {
     /// SQL 실행에 사용할 데이터베이스 핸들
     let db: any SQLDatabase

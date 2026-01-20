@@ -18,6 +18,14 @@ enum SocialAuthError: Error {
 }
 
 
+/// 인증 관련 API 라우트를 모아 등록하는 컨트롤러입니다.
+///
+/// - Composition:
+///     - authService: 로그인/토큰 비즈니스 로직
+///     - users: 사용자 저장소
+///     - socialAuthService: 소셜 로그인 검증
+/// - Important:
+///     - 각 엔드포인트는 `/auth` 경로 하위에 등록됩니다.
 struct AuthController: RouteCollection, Sendable {
 
     /// 인증 관련 비즈니스 로직을 수행하는 서비스
@@ -135,4 +143,3 @@ struct AuthController: RouteCollection, Sendable {
 
 
 }
-

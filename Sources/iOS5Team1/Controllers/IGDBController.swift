@@ -9,6 +9,12 @@
 
 import Vapor
 
+/// IGDB 프록시 API 라우트를 제공하는 컨트롤러입니다.
+///
+/// - Composition:
+///     - /v4/multiquery, /v4/games 엔드포인트
+/// - Important:
+///     - 요청 본문은 IGDB 쿼리 문자열을 그대로 전달합니다.
 struct IGDBController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let v4 = routes.grouped("v4")
@@ -70,4 +76,3 @@ struct IGDBController: RouteCollection {
         return res
     }
 }
-

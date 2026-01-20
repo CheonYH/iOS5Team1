@@ -12,6 +12,12 @@ import Vapor
 import SQLKit
 import MySQLKit
 
+/// MySQL 기반 리뷰 리포지토리 구현체입니다.
+///
+/// - Composition:
+///     - db: SQL 실행 핸들
+/// - Important:
+///     - 정렬/통계는 SQL로 처리합니다.
 struct MySQLReviewRepository: ReviewRepository {
 
     let db: any SQLDatabase
@@ -100,6 +106,5 @@ struct MySQLReviewRepository: ReviewRepository {
         return .init(gameId: gameId, averageRating: avg, reviewCount: count)
     }
 }
-
 
 

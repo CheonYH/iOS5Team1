@@ -10,6 +10,14 @@
 import Foundation
 import JWT
 
+/// JWT 액세스 토큰의 페이로드 모델입니다.
+///
+/// - Composition:
+///     - sub: 사용자 식별자
+///     - exp: 만료 시각
+///     - iat: 발급 시각
+/// - Important:
+///     - exp 검증에 실패하면 요청은 거부됩니다.
 struct AccessTokenPayload: JWTPayload {
     let sub: SubjectClaim
     let exp: ExpirationClaim
