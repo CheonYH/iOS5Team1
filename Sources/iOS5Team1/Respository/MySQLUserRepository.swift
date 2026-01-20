@@ -23,7 +23,7 @@ actor MySQLUserRepository: UserRepository {
     /// 이메일로 사용자 1명을 조회합니다. 없으면 nil 반환
     func findByEmail(_ email: String) async throws -> User? {
         let rows = try await db.raw("""
-            SELECT id, email, password, nickname, created_at, updated_at
+            SELECT id, email, password, nickname, provider, provider_uid, created_at, updated_at
             FROM users
             WHERE email = \(bind: email)
             LIMIT 1
@@ -37,8 +37,8 @@ actor MySQLUserRepository: UserRepository {
             email: try row.decode(column: "email", as: String?.self),
             password: try row.decode(column: "password", as: String?.self),
             nickname: try row.decode(column: "nickname", as: String.self),
-            provider: try row.decode(column: "provider", as: String.self),
-            providerUid: try row.decode(column: "provider_uid", as: String.self),
+            provider: try row.decode(column: "provider", as: String?.self),
+            providerUid: try row.decode(column: "provider_uid", as: String?.self),
             createdAt: try row.decode(column: "created_at", as: Date?.self),
             updatedAt: try row.decode(column: "updated_at", as: Date?.self)
         )
@@ -101,8 +101,8 @@ actor MySQLUserRepository: UserRepository {
             email: try row.decode(column: "email", as: String?.self),
             password: try row.decode(column: "password", as: String?.self),
             nickname: try row.decode(column: "nickname", as: String.self),
-            provider: try row.decode(column: "provider", as: String.self),
-            providerUid: try row.decode(column: "provider_uid", as: String.self),
+            provider: try row.decode(column: "provider", as: String?.self),
+            providerUid: try row.decode(column: "provider_uid", as: String?.self),
             createdAt: try row.decode(column: "created_at", as: Date?.self),
             updatedAt: try row.decode(column: "updated_at", as: Date?.self)
         )
@@ -127,8 +127,8 @@ actor MySQLUserRepository: UserRepository {
             email: try row.decode(column: "email", as: String?.self),
             password: nil,
             nickname: try row.decode(column: "nickname", as: String.self),
-            provider: try row.decode(column: "provider", as: String.self),
-            providerUid: try row.decode(column: "provider_uid", as: String.self),
+            provider: try row.decode(column: "provider", as: String?.self),
+            providerUid: try row.decode(column: "provider_uid", as: String?.self),
             createdAt: try? row.decode(column: "created_at", as: Date.self),
             updatedAt: try? row.decode(column: "updated_at", as: Date.self)
         )
@@ -141,4 +141,3 @@ actor MySQLUserRepository: UserRepository {
         self.db = db
     }
 }
-
