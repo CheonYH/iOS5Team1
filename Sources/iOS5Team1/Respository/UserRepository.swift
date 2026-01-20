@@ -10,12 +10,6 @@
 import Foundation
 import SQLKit
 
-/// 사용자 데이터 접근 인터페이스입니다.
-///
-/// - Composition:
-///     - exists/create/find 계열 메서드
-/// - Important:
-///     - 구현체는 DB 종류에 따라 달라집니다.
 protocol UserRepository: Sendable {
     /// 이메일 중복 여부 확인
     func exists(email: String) async throws -> Bool
@@ -31,3 +25,4 @@ protocol UserRepository: Sendable {
     func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User
 
 }
+

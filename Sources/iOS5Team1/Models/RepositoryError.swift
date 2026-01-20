@@ -12,12 +12,6 @@
 
 import Vapor
 
-/// 리포지토리 계층에서 발생하는 공통 오류입니다.
-///
-/// - Composition:
-///     - queryFailed/insertFailed/notFound/conflict/invalidData
-/// - Important:
-///     - 상위 계층에서 사용자 메시지로 변환해 사용합니다.
 enum RepositoryError: Error {
     case queryFailed
     case insertFailed

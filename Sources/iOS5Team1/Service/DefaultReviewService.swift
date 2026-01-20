@@ -10,12 +10,6 @@
 
 import Vapor
 
-/// 리뷰 비즈니스 로직의 기본 구현체입니다.
-///
-/// - Composition:
-///     - repo: 리뷰 저장소
-/// - Important:
-///     - 생성 후 조회를 통해 응답 모델을 구성합니다.
 struct DefaultReviewService: ReviewService {
 
     /// 리뷰 데이터 접근을 담당하는 리포지토리

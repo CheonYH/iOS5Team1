@@ -9,12 +9,6 @@
 
 import Vapor
 
-/// 리뷰 데이터 접근 인터페이스입니다.
-///
-/// - Composition:
-///     - create/update/delete/fetch 메서드
-/// - Important:
-///     - 정렬/통계 로직은 구현체에서 수행됩니다.
 protocol ReviewRepository: Sendable {
     /// 리뷰 생성 후 생성된 ID 반환
     func create(userId: Int, gameId: Int, rating: Int, content: String) async throws -> Int

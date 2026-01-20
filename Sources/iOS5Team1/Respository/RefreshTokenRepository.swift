@@ -10,12 +10,6 @@
 import Foundation
 import SQLKit
 
-/// 리프레시 토큰 저장소 인터페이스입니다.
-///
-/// - Composition:
-///     - create/find/markUsed/revoke/delete/cleanup
-/// - Important:
-///     - 토큰 보안 정책은 이 계층에서 강제됩니다.
 protocol RefreshTokenRepository: Sendable {
     func create(
         userId: Int,
@@ -41,4 +35,5 @@ protocol RefreshTokenRepository: Sendable {
 
     func cleanupExpired() async throws
 }
+
 

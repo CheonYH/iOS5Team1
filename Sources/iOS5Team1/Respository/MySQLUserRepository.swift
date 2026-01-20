@@ -14,12 +14,6 @@ import Foundation
 import SQLKit
 import Vapor
 
-/// MySQL 기반 사용자 리포지토리 구현체입니다.
-///
-/// - Composition:
-///     - db: SQL 실행 핸들
-/// - Important:
-///     - SQL 바인딩으로 인젝션을 방지합니다.
 actor MySQLUserRepository: UserRepository {
 
 
@@ -147,3 +141,4 @@ actor MySQLUserRepository: UserRepository {
         self.db = db
     }
 }
+

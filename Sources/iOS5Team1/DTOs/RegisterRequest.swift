@@ -10,12 +10,6 @@ import Foundation
 import Vapor
 
 /// 회원가입 시 클라이언트가 보내는 데이터 형식
-/// 회원가입 요청 DTO입니다.
-///
-/// - Composition:
-///     - email/password/nickname
-/// - Important:
-///     - 비밀번호는 서버에서 해시 처리됩니다.
 struct RegisterRequest: Content {
     /// 사용자 이메일(로그인 ID)
     let email: String

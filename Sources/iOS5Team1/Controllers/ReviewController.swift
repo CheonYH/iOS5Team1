@@ -10,12 +10,6 @@
 
 import Vapor
 
-/// 리뷰 관련 API 라우트를 모아 등록하는 컨트롤러입니다.
-///
-/// - Composition:
-///     - service: 리뷰 비즈니스 로직
-/// - Important:
-///     - 보호된 라우트는 JWT 미들웨어가 적용됩니다.
 struct ReviewController: RouteCollection, Sendable {
     /// 리뷰 관련 비즈니스 로직을 수행하는 서비스
     let service: any ReviewService
@@ -99,3 +93,4 @@ struct ReviewController: RouteCollection, Sendable {
         return try await service.fetchStats(gameId: gameId)
     }
 }
+

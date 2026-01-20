@@ -10,12 +10,6 @@
 
 import Vapor
 
-/// 리뷰 비즈니스 로직 인터페이스입니다.
-///
-/// - Composition:
-///     - create/update/delete/fetch 메서드 집합
-/// - Important:
-///     - 구현체는 데이터 접근을 Repository에 위임합니다.
 protocol ReviewService: Sendable {
 
     /// 리뷰 생성

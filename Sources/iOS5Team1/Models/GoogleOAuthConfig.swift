@@ -9,13 +9,6 @@
 
 import Vapor
 
-/// Google OAuth 설정 모델입니다.
-///
-/// - Composition:
-///     - clientId/clientSecret: OAuth 클라이언트 인증 정보
-///     - redirectURI: 인증 후 리다이렉트 주소
-/// - Important:
-///     - 값은 환경 변수에서 주입됩니다.
 struct GoogleOAuthConfig {
     let clientId: String
     let clientSecret: String

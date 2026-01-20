@@ -8,12 +8,7 @@
 
 import Foundation
 
-/// DB의 refresh_tokens 테이블과 1:1로 매핑되는 모델입니다.
-///
-/// - Composition:
-///     - expiresAt/usedAt/revokedAt: 토큰 상태 시각
-/// - Important:
-///     - 만료 또는 폐기된 토큰은 인증에 사용할 수 없습니다.
+/// DB의 refresh_tokens 테이블과 1:1로 매핑되는 단순 모델
 struct RefreshToken: Sendable {
     let id: Int
     let userId: Int
@@ -30,3 +25,4 @@ struct RefreshToken: Sendable {
     let createdAt: Date
     let updatedAt: Date?
 }
+

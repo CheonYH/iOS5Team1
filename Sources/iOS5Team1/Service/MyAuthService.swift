@@ -17,13 +17,6 @@ import Vapor
 import JWT
 import SQLKit
 
-/// 이메일 기반 인증 및 토큰 관리를 수행하는 서비스입니다.
-///
-/// - Composition:
-///     - users: 사용자 저장소
-///     - refreshTokens: 리프레시 토큰 저장소
-/// - Important:
-///     - access/refresh TTL 정책은 이 타입에서 결정됩니다.
 actor MyAuthService: AuthService {
 
     let users: any UserRepository

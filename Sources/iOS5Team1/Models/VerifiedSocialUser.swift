@@ -9,14 +9,6 @@
 
 import Foundation
 
-/// 소셜 로그인 검증 결과를 담는 모델입니다.
-///
-/// - Composition:
-///     - uid: 제공자 고유 사용자 ID
-///     - email/isEmailVerified: 이메일 정보(있을 수 있음)
-///     - provider: 소셜 제공자 타입
-/// - Important:
-///     - uid와 provider 조합으로 사용자를 식별합니다.
 struct VerifiedSocialUser {
     let uid: String          // provider unique ID
     let email: String?
