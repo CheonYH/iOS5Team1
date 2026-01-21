@@ -46,38 +46,44 @@ struct MySQLReviewRepository: ReviewRepository {
     }
 
     func fetchByGame(gameId: Int, sort: ReviewSort) async throws -> [ReviewResponse] {
-        let sql: SQLQueryString
+        let orderSQL: SQLQueryString
 
         switch sort {
         case .latest:
-            sql = """
-                SELECT id, user_id, game_id, rating, content, created_at, updated_at
-                FROM reviews
-                WHERE game_id = \(bind: gameId)
-                ORDER BY created_at DESC
-            """
+            orderSQL = "ORDER BY created_at DESC"
         case .highest:
-            sql = """
-                SELECT id, user_id, game_id, rating, content, created_at, updated_at
-                FROM reviews
-                WHERE game_id = \(bind: gameId)
-                ORDER BY rating DESC, created_at DESC
-            """
+            orderSQL = "ORDER BY rating DESC, created_at DESC"
         case .lowest:
-            sql = """
-                SELECT id, user_id, game_id, rating, content, created_at, updated_at
-                FROM reviews
-                WHERE game_id = \(bind: gameId)
-                ORDER BY rating ASC, created_at DESC
-            """
+            orderSQL = "ORDER BY rating ASC, created_at DESC"
         }
+
+        let sql: SQLQueryString = """
+            SELECT
+                id,
+                user_id   AS userId,
+                game_id   AS gameId,
+                rating,
+                content,
+                created_at AS createdAt,
+                updated_at AS updatedAt
+            FROM reviews
+            WHERE game_id = \(bind: gameId)
+            \(orderSQL)
+        """
 
         return try await db.raw(sql).all(decoding: ReviewResponse.self)
     }
 
     func fetchByUser(userId: Int) async throws -> [ReviewResponse] {
         try await db.raw("""
-            SELECT id, user_id, game_id, rating, content, created_at, updated_at
+            SELECT
+                id,
+                user_id   AS userId,
+                game_id   AS gameId,
+                rating,
+                content,
+                created_at AS createdAt,
+                updated_at AS updatedAt
             FROM reviews
             WHERE user_id = \(bind: userId)
             ORDER BY created_at DESC
@@ -97,9 +103,11 @@ struct MySQLReviewRepository: ReviewRepository {
         let avg = try row.decode(column: "avg", as: Double?.self) ?? 0
         let count = try row.decode(column: "cnt", as: Int?.self) ?? 0
 
+
         return .init(gameId: gameId, averageRating: avg, reviewCount: count)
     }
 }
+
 
 
 

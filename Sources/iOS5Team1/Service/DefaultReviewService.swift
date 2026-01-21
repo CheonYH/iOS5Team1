@@ -9,6 +9,7 @@
 //  - ReviewRepository: 실제 SQL을 실행하는 계층으로, 이 서비스는 그 결과를 조합해 반환합니다.
 
 import Vapor
+import MySQLKit
 
 struct DefaultReviewService: ReviewService {
 
@@ -17,19 +18,26 @@ struct DefaultReviewService: ReviewService {
 
     /// 리뷰 생성 후, 생성된 리뷰를 다시 조회하여 응답 모델로 반환합니다.
     func create(request: CreateReviewRequest, userId: Int) async throws -> ReviewResponse {
-        let id = try await repo.create(
-            userId: userId,
-            gameId: request.gameId,
-            rating: request.rating,
-            content: request.content
-        )
+        do {
+            let id = try await repo.create(
+                userId: userId,
+                gameId: request.gameId,
+                rating: request.rating,
+                content: request.content
+            )
 
-        // 방금 생성한 리뷰를 조회하여 클라이언트에 상세 정보를 전달
-        let reviews = try await fetchByUser(userId: userId)
-        guard let review = reviews.first(where: { $0.id == id }) else {
-            throw Abort(.internalServerError, reason: "리뷰 조회 실패")
+            // 방금 생성한 리뷰를 조회하여 클라이언트에 상세 정보를 전달
+            let reviews = try await fetchByUser(userId: userId)
+            guard let review = reviews.first(where: { $0.id == id }) else {
+                throw Abort(.internalServerError, reason: "리뷰 조회 실패")
+            }
+            return review
+        } catch let sqlError as MySQLError {
+            if case .server(let errPacket) = sqlError, errPacket.errorCode == 1062 {
+                throw Abort(.conflict, reason: "이미 해당 게임에 작성된 리뷰가 존재합니다.")
+            }
+            throw sqlError
         }
-        return review
     }
 
     /// 리뷰 수정
