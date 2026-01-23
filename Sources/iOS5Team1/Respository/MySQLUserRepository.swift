@@ -142,7 +142,7 @@ actor MySQLUserRepository: UserRepository {
     func updateNickname(userId: Int, nickname: String) async throws {
         try await db.raw("""
         UPDATE users SET nickname = \(bind: nickname),
-        update_at = CURRENT_TIMESTAMP WHERE id = \(bind: userId)
+        updated_at = CURRENT_TIMESTAMP WHERE id = \(bind: userId)
         """).run()
     }
 
