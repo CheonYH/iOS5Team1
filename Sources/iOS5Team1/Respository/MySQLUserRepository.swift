@@ -26,7 +26,7 @@ actor MySQLUserRepository: UserRepository {
             SELECT id, email, password, nickname, provider, provider_uid, created_at, updated_at
             FROM users
             WHERE email = \(bind: email)
-              AND provider IS NULL
+              AND (provider IS NULL OR provider = 'local')
             LIMIT 1
             """)
             .all()
@@ -51,7 +51,7 @@ actor MySQLUserRepository: UserRepository {
             SELECT EXISTS(
                 SELECT 1 FROM users
                 WHERE email = \(bind: email)
-                  AND provider IS NULL
+                  AND (provider IS NULL OR provider = 'local')
             ) AS user_exists
             """).all()
 
@@ -78,8 +78,8 @@ actor MySQLUserRepository: UserRepository {
     /// 사용자 생성 후, 방금 생성한 사용자 정보를 반환합니다.
     func create(email: String, password: String, nickname: String) async throws -> User {
         try await db.raw("""
-            INSERT INTO users (email, password, nickname)
-            VALUES (\(bind: email), \(bind: password), \(bind: nickname))
+            INSERT INTO users (email, password, nickname, provider)
+            VALUES (\(bind: email), \(bind: password), \(bind: nickname), 'local')
             """)
         .run()
 
