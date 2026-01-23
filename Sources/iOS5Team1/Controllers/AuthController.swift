@@ -19,6 +19,8 @@ struct AuthController: RouteCollection, Sendable {
     let authService: any AuthService
     /// 사용자 데이터 리포지토리
     let users: any UserRepository
+    /// 프로필 데이터 리포지토리
+    let profiles: any ProfileRepository
 
     /// 소셜 로그인 처리 서비스
     let socialAuthService: SocialAuthService
@@ -51,7 +53,8 @@ struct AuthController: RouteCollection, Sendable {
 
         // 비밀번호 해시 후 저장
         let hashed = try Bcrypt.hash(body.password)
-        _ = try await users.create(email: body.email, password: hashed, nickname: body.nickname)
+        let user = try await users.create(email: body.email, password: hashed, nickname: body.nickname)
+        _ = try await profiles.create(userId: user.id, nickname: body.nickname, avatarUrl: nil)
 
         return .init(success: true, message: "회원가입 성공")
     }
@@ -135,6 +138,7 @@ struct AuthController: RouteCollection, Sendable {
             providerUid: body.providerUid,
             nickname: body.nickname
         )
+        _ = try await profiles.create(userId: user.id, nickname: body.nickname, avatarUrl: nil)
 
         return try await authService.createTokenPair(req: req, userId: user.id)
     }

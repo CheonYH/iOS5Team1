@@ -36,9 +36,14 @@ func routes(_ app: Application) throws {
     }
 
     // Auth 컨트롤러 등록
+    guard let profiles = app.storage[ProfileRepositoryKey.self] else {
+        fatalError("ProfileRepository not registered")
+    }
+
     let authController = AuthController(
         authService: authService,
         users: users,
+        profiles: profiles,
         socialAuthService: socialAuthService
     )
     try app.register(collection: authController)
@@ -60,12 +65,10 @@ func routes(_ app: Application) throws {
         try app.register(collection: R2Controller(service: r2Service))
     }
 
-    if let profiles = app.storage[ProfileRepositoryKey.self] {
-        let r2Service = app.storage[R2ServiceKey.self]
-        try app.register(collection: ProfileController(
-            profiles: profiles,
-            users: users,
-            r2Service: r2Service
-        ))
-    }
+    let r2Service = app.storage[R2ServiceKey.self]
+    try app.register(collection: ProfileController(
+        profiles: profiles,
+        users: users,
+        r2Service: r2Service
+    ))
 }

@@ -179,6 +179,7 @@ public func configure(_ app: Application) async throws {
     try app.register(collection: AuthController(
         authService: authService,
         users: userRepo,
+        profiles: profileRepo,
         socialAuthService: socialAuthService
     ))
     try app.register(collection: ReviewController(service: reviewService))
