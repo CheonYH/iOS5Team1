@@ -5,6 +5,7 @@
 //  R2(S3 호환) presigned URL 생성을 담당하는 서비스입니다.
 
 import SotoS3
+import Vapor
 
 /// R2 presigned URL 생성과 S3 클라이언트를 캡슐화합니다.
 final class R2Service: @unchecked Sendable {
