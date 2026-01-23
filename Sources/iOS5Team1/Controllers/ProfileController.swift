@@ -17,6 +17,8 @@ struct ProfileController: RouteCollection, Sendable {
     let profiles: any ProfileRepository
     /// 사용자 데이터 접근용 리포지토리
     let users: any UserRepository
+    /// R2 삭제 처리용 서비스(선택)
+    let r2Service: R2Service?
 
     /// 라우트를 등록합니다.
     func boot(routes: any RoutesBuilder) throws {
@@ -83,6 +85,7 @@ struct ProfileController: RouteCollection, Sendable {
         }
 
         let body = try req.content.decode(UpdateProfileRequest.self)
+        let current = try await profiles.findByUserId(userId)
 
         let updated = try await profiles.update(
             userId: userId,
@@ -93,6 +96,13 @@ struct ProfileController: RouteCollection, Sendable {
         if let newNickname = body.nickname {
             // users.nickname과 동기화를 유지합니다.
             try await users.updateNickname(userId: userId, nickname: newNickname)
+        }
+
+        if let newAvatar = body.avatarUrl,
+           let oldAvatar = current?.avatarUrl,
+           newAvatar != oldAvatar,
+           let r2Key = r2Service?.extractKey(from: oldAvatar) {
+            try await r2Service?.deleteObject(key: r2Key)
         }
 
         return ProfileResponse(

@@ -61,6 +61,11 @@ func routes(_ app: Application) throws {
     }
 
     if let profiles = app.storage[ProfileRepositoryKey.self] {
-        try app.register(collection: ProfileController(profiles: profiles, users: users))
+        let r2Service = app.storage[R2ServiceKey.self]
+        try app.register(collection: ProfileController(
+            profiles: profiles,
+            users: users,
+            r2Service: r2Service
+        ))
     }
 }

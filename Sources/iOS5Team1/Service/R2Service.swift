@@ -38,4 +38,22 @@ final class R2Service: @unchecked Sendable {
         ).get()
         return signed.absoluteString
     }
+
+    /// R2 객체를 삭제합니다.
+    func deleteObject(key: String) async throws {
+        _ = try await s3.deleteObject(.init(bucket: config.bucket, key: key)).get()
+    }
+
+    /// URL 또는 키에서 객체 키를 추출합니다.
+    func extractKey(from urlOrKey: String) -> String? {
+        if let url = URL(string: urlOrKey), let host = url.host {
+            let path = url.path
+            let prefix = "/\(config.bucket)/"
+            if host.contains("r2.cloudflarestorage.com"), path.hasPrefix(prefix) {
+                return String(path.dropFirst(prefix.count))
+            }
+            return nil
+        }
+        return urlOrKey.isEmpty ? nil : urlOrKey
+    }
 }
