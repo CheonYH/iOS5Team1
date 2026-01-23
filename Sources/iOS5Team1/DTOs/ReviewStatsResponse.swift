@@ -17,4 +17,5 @@ struct ReviewStatsResponse: Content {
     let averageRating: Double
     /// 리뷰 개수
     let reviewCount: Int
+    
 }

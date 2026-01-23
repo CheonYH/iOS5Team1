@@ -17,6 +17,7 @@ import Vapor
 import JWT
 import JWTKit
 import SQLKit
+import SotoCore
 
 public func configure(_ app: Application) async throws {
 
@@ -36,7 +37,9 @@ public func configure(_ app: Application) async throws {
         "IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET",
         "FIREBASE_API_KEY", "FIREBASE_APP_ID",
         "FIREBASE_GCM_SENDER_ID", "FIREBASE_PROJECT_ID",
-        "FIREBASE_STORAGE_BUCKET", "FIREBASE_CLIENT_ID"
+        "FIREBASE_STORAGE_BUCKET", "FIREBASE_CLIENT_ID",
+        "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY",
+        "R2_ACCOUNT_ID", "R2_BUCKET", "R2_PUBLIC_BASE_URL"
     ]
     for key in envVars {
         print("[ENV]", key, "=", Environment.get(key) ?? "NIL")
@@ -105,10 +108,12 @@ public func configure(_ app: Application) async throws {
     let userRepo = MySQLUserRepository(db: sql)
     let refreshRepo = MySQLRefreshTokenRepository(db: sql)
     let reviewRepo = MySQLReviewRepository(db: sql)
+    let profileRepo = MySQLProfileRepository(db: sql)
 
     app.storage[UserRepositoryKey.self] = userRepo
     app.storage[RefreshTokenRepositoryKey.self] = refreshRepo
     app.storage[ReviewRepositoryKey.self] = reviewRepo
+    app.storage[ProfileRepositoryKey.self] = profileRepo
 
     let authService = MyAuthService(users: userRepo, refreshTokens: refreshRepo)
     let reviewService = DefaultReviewService(repo: reviewRepo)
@@ -120,6 +125,18 @@ public func configure(_ app: Application) async throws {
     app.storage[AuthServiceKey.self] = authService
     app.storage[ReviewServiceKey.self] = reviewService
     app.storage[IGDBServiceKey.self] = igdbService
+
+    if let r2Config = R2Config.fromEnv() {
+        app.storage[R2ConfigKey.self] = r2Config
+        print("[R2] Config loaded (bucket=\(r2Config.bucket))")
+    } else {
+        print("[R2] Env missing, config not loaded")
+    }
+
+    if let r2Config = app.storage[R2ConfigKey.self] {
+        app.storage[R2ServiceKey.self] = R2Service(config: r2Config)
+        print("[R2] Service ready")
+    }
 
     guard
         let apiKey = Environment.get("FIREBASE_API_KEY"),
@@ -165,6 +182,11 @@ public func configure(_ app: Application) async throws {
         socialAuthService: socialAuthService
     ))
     try app.register(collection: ReviewController(service: reviewService))
+
+
+    if let r2Service = app.storage[R2ServiceKey.self] {
+        app.lifecycle.use(R2LifecycleHandler(service: r2Service))
+    }
 
     try routes(app)
     print("===== [BOOT COMPLETE] Vapor running =====")

@@ -1,33 +1,29 @@
 //  AuthController.swift
 //  iOS5Team1
 //
-//  인증(회원가입/로그인/토큰 관리/닉네임 중복 확인) 관련 라우트를 담당하는 컨트롤러입니다.
-//
-//  초보자 가이드
-//  - RouteCollection: 여러 API 경로를 묶어 한 번에 등록할 수 있는 Vapor 프로토콜
-//  - Request/Response: 클라이언트 ↔ 서버 간 주고받는 데이터 형식
-//  - Bcrypt: 비밀번호를 안전하게 저장하기 위한 해시 함수 라이브러리
+//  인증(회원가입/로그인/토큰 관리/닉네임 중복 확인) API를 담당하는 컨트롤러입니다.
 
 import Vapor
 
-
+/// 소셜 인증 과정에서 발생하는 오류 타입입니다.
 enum SocialAuthError: Error {
     case registrationNeeded(email: String)
     case invalidToken
     case unsupportedProvider
 }
 
-
+/// 인증 관련 라우트를 등록하고 처리합니다.
 struct AuthController: RouteCollection, Sendable {
 
-    /// 인증 관련 비즈니스 로직을 수행하는 서비스
+    /// 인증 관련 비즈니스 로직 서비스
     let authService: any AuthService
-    /// 사용자 정보를 DB에서 관리하는 리포지토리
+    /// 사용자 데이터 리포지토리
     let users: any UserRepository
 
+    /// 소셜 로그인 처리 서비스
     let socialAuthService: SocialAuthService
 
-    /// 이 컨트롤러에서 제공하는 라우트들을 등록합니다.
+    /// 라우트를 등록합니다.
     func boot(routes: any RoutesBuilder) throws {
         let auth = routes.grouped("auth") // /auth
         auth.post("register", use: register)      // POST /auth/register
@@ -37,11 +33,14 @@ struct AuthController: RouteCollection, Sendable {
         auth.post("nickname-check", use: checkNickname) // POST /auth/nickname-check
         auth.post("social", use: socialLogin)
         auth.post("social-register", use: socialRegister)
+
+
+        let protected = auth.grouped(JWTMiddleware())
+        protected.post("nickname-update", use: updateNickname)
+
     }
 
-    /// 회원가입 처리
-    /// - 입력: 이메일, 비밀번호, 닉네임
-    /// - 출력: 성공 여부와 메시지
+    /// 회원가입을 처리합니다.
     func register(req: Request) async throws -> RegisterResponse {
         let body = try req.content.decode(RegisterRequest.self)
 
@@ -57,28 +56,26 @@ struct AuthController: RouteCollection, Sendable {
         return .init(success: true, message: "회원가입 성공")
     }
 
-    /// 로그인 처리
-    /// - 입력: 이메일, 비밀번호
-    /// - 출력: 액세스/리프레시 토큰 쌍(TokenPair)
+    /// 로그인 후 액세스/리프레시 토큰을 반환합니다.
     func login(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(LoginRequest.self)
         return try await authService.login(req: req, email: body.email, password: body.password)
     }
 
-    /// 리프레시 토큰으로 액세스 토큰 재발급
+    /// 리프레시 토큰으로 액세스 토큰을 재발급합니다.
     func refresh(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(RefreshRequest.self)
         return try await authService.refresh(req: req, refreshToken: body.refreshToken)
     }
 
-    /// 로그아웃 처리: 리프레시 토큰 폐기
+    /// 로그아웃 처리(리프레시 토큰 폐기)입니다.
     func logout(req: Request) async throws -> HTTPStatus {
         let body = try req.content.decode(RefreshRequest.self)
         try await authService.logout(refreshToken: body.refreshToken)
         return .ok
     }
 
-    /// 닉네임 중복 확인
+    /// 닉네임 중복 여부를 확인합니다.
     func checkNickname(req: Request) async throws -> NicknameAvailabilityResponse {
         let body = try req.content.decode(NicknameCheckRequest.self)
 
@@ -87,6 +84,7 @@ struct AuthController: RouteCollection, Sendable {
         return .init(available: !exists)
     }
 
+    /// 소셜 로그인 진입점입니다.
     func socialLogin(req: Request) async throws -> Response {
         let body = try req.content.decode(SocialIdTokenLoginRequest.self)
         let provider = body.provider
@@ -102,6 +100,10 @@ struct AuthController: RouteCollection, Sendable {
             return Response(status: .ok, body: .init(data: try JSONEncoder().encode(tokens)))
         }
 
+        if let email = verified.email, try await users.exists(email: email) {
+            throw Abort(.conflict, reason: "이미 존재하는 이메일입니다.")
+        }
+
         let json = [
             "status": "registration_needed",
             "provider": provider.rawValue,
@@ -115,12 +117,16 @@ struct AuthController: RouteCollection, Sendable {
         )
     }
 
-
+    /// 소셜 회원가입을 처리합니다.
     func socialRegister(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(SocialRegisterRequest.self)
 
         guard let provider = SocialProvider(rawValue: body.provider) else {
             throw Abort(.badRequest, reason: "Invalid provider")
+        }
+
+        if let email = body.email, try await users.exists(email: email) {
+            throw Abort(.conflict, reason: "이미 존재하는 이메일입니다.")
         }
 
         let user = try await users.createSocial(
@@ -133,6 +139,22 @@ struct AuthController: RouteCollection, Sendable {
         return try await authService.createTokenPair(req: req, userId: user.id)
     }
 
+    /// 사용자 닉네임을 변경합니다.
+    func updateNickname(req: Request) async throws -> HTTPStatus {
+        let paylooad = try await req.jwt.verify(as: AccessTokenPayload.self)
+        guard let userId = Int(paylooad.sub.value) else {
+            throw Abort(.unauthorized)
+        }
+
+        let body = try req.content.decode(UpdateNickNameRequest.self)
+        let exists = try await users.exists(nickname: body.nickName)
+
+        guard !exists else {
+            throw Abort(.conflict, reason: "이미 사용중인 닉네임 입니다.")
+        }
+
+        try await users.updateNickname(userId: userId, nickname: body.nickName)
+        return .ok
+    }
 
 }
-

@@ -2,13 +2,11 @@
 //  iOS5Team1
 //
 //  IGDB API를 프록시로 호출하는 컨트롤러입니다.
-//
-//  초보자 가이드
-//  - 프록시(proxy): 클라이언트가 직접 호출하지 못하는 외부 API를 서버가 대신 호출해 주는 패턴
-//  - Client-ID/Bearer 토큰: IGDB 인증에 필요한 헤더 값입니다.
+//  클라이언트가 직접 호출하기 어려운 IGDB 엔드포인트를 서버가 대행합니다.
 
 import Vapor
 
+/// IGDB 프록시 라우트를 등록합니다.
 struct IGDBController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let v4 = routes.grouped("v4")
@@ -16,7 +14,7 @@ struct IGDBController: RouteCollection {
         v4.post("games", use: gameDetail)
     }
 
-    // Multiquery
+    /// IGDB multiquery를 프록시합니다.
     func multiquery(req: Request) async throws -> Response {
         // IGDB 액세스 토큰을 캐시에서 가져오거나 새로 발급합니다.
         let token = try await req.igdb.getAccessToken(client: req.client)
@@ -43,7 +41,7 @@ struct IGDBController: RouteCollection {
         return res
     }
 
-    // Detail query
+    /// IGDB games 조회를 프록시합니다.
     func gameDetail(req: Request) async throws -> Response {
         // IGDB 액세스 토큰을 캐시에서 가져오거나 새로 발급합니다.
         let token = try await req.igdb.getAccessToken(client: req.client)
@@ -70,4 +68,3 @@ struct IGDBController: RouteCollection {
         return res
     }
 }
-

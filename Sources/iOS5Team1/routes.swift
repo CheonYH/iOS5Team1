@@ -54,6 +54,13 @@ func routes(_ app: Application) throws {
     // 추가 컨트롤러
     try app.register(collection: IGDBController())
     try app.register(collection: FirebaseController())
+
+
+    if let r2Service = app.storage[R2ServiceKey.self] {
+        try app.register(collection: R2Controller(service: r2Service))
+    }
+
+    if let profiles = app.storage[ProfileRepositoryKey.self] {
+        try app.register(collection: ProfileController(profiles: profiles, users: users))
+    }
 }
-
-

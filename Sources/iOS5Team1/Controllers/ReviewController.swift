@@ -1,20 +1,16 @@
 //  ReviewController.swift
 //  iOS5Team1
 //
-//  리뷰(생성/수정/삭제/조회/통계) 관련 API를 담당하는 컨트롤러입니다.
-//
-//  초보자 가이드
-//  - JWTMiddleware: 요청에 포함된 JWT 토큰을 검증하여 보호된 라우트를 지킵니다.
-//  - grouped("reviews"): 모든 경로 앞에 /reviews가 붙습니다.
-//  - req.parameters / req.query: URL 경로/쿼리에서 값을 읽는 방법입니다.
+//  리뷰(생성/수정/삭제/조회/통계) API를 담당하는 컨트롤러입니다.
 
 import Vapor
 
+/// 리뷰 라우트를 등록하고 처리합니다.
 struct ReviewController: RouteCollection, Sendable {
-    /// 리뷰 관련 비즈니스 로직을 수행하는 서비스
+    /// 리뷰 서비스
     let service: any ReviewService
 
-    /// 이 컨트롤러에서 제공하는 라우트들을 등록합니다.
+    /// 라우트를 등록합니다.
     func boot(routes: any RoutesBuilder) throws {
         let reviews = routes.grouped("reviews")    // /reviews
 
@@ -30,8 +26,7 @@ struct ReviewController: RouteCollection, Sendable {
         protected.get("me", use: fetchByUser)                       // GET /reviews/me
     }
 
-    /// 리뷰 생성
-    /// - 요구: 유효한 JWT 토큰(사용자 인증)
+    /// 리뷰를 생성합니다.
     func create(req: Request) async throws -> ReviewResponse {
         // 토큰에서 사용자 ID 추출
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
@@ -45,7 +40,7 @@ struct ReviewController: RouteCollection, Sendable {
         return review // 필요하면 Response(status: .created, ...) 패턴 적용 가능
     }
 
-    /// 리뷰 수정
+    /// 리뷰를 수정합니다.
     func update(req: Request) async throws -> HTTPStatus {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
         guard let userId = Int(payload.sub.value) else {
@@ -59,7 +54,7 @@ struct ReviewController: RouteCollection, Sendable {
         return .ok
     }
 
-    /// 리뷰 삭제
+    /// 리뷰를 삭제합니다.
     func delete(req: Request) async throws -> HTTPStatus {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
         guard let userId = Int(payload.sub.value) else {
@@ -71,7 +66,7 @@ struct ReviewController: RouteCollection, Sendable {
         return .noContent
     }
 
-    /// 내 리뷰 목록 조회
+    /// 내 리뷰 목록을 조회합니다.
     func fetchByUser(req: Request) async throws -> [ReviewResponse] {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
         guard let userId = Int(payload.sub.value) else {
@@ -80,17 +75,16 @@ struct ReviewController: RouteCollection, Sendable {
         return try await service.fetchByUser(userId: userId)
     }
 
-    /// 특정 게임의 리뷰 목록 조회 (정렬 옵션 지원)
+    /// 특정 게임의 리뷰 목록을 조회합니다.
     func fetchByGame(req: Request) async throws -> [ReviewResponse] {
         let gameId = try req.parameters.require("gameId", as: Int.self)
         let sort = ReviewSort(rawValue: req.query["sort"] ?? "") ?? .latest
         return try await service.fetchByGame(gameId: gameId, sort: sort)
     }
 
-    /// 특정 게임의 리뷰 통계 조회(평균/개수)
+    /// 특정 게임의 리뷰 통계를 조회합니다.
     func fetchStats(req: Request) async throws -> ReviewStatsResponse {
         let gameId = try req.parameters.require("gameId", as: Int.self)
         return try await service.fetchStats(gameId: gameId)
     }
 }
-

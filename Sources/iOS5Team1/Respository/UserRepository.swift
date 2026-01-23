@@ -24,5 +24,7 @@ protocol UserRepository: Sendable {
 
     func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User
 
+    func updateNickname(userId: Int, nickname: String) async throws 
+
 }
 

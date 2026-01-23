@@ -103,11 +103,8 @@ struct MySQLReviewRepository: ReviewRepository {
         let avg = try row.decode(column: "avg", as: Double?.self) ?? 0
         let count = try row.decode(column: "cnt", as: Int?.self) ?? 0
 
-
         return .init(gameId: gameId, averageRating: avg, reviewCount: count)
     }
 }
-
-
 
 

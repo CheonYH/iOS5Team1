@@ -26,6 +26,7 @@ actor MySQLUserRepository: UserRepository {
             SELECT id, email, password, nickname, provider, provider_uid, created_at, updated_at
             FROM users
             WHERE email = \(bind: email)
+              AND provider IS NULL
             LIMIT 1
             """)
             .all()
@@ -47,7 +48,11 @@ actor MySQLUserRepository: UserRepository {
     /// 이메일 중복 여부 확인
     func exists(email: String) async throws -> Bool {
         let rows = try await db.raw("""
-            SELECT EXISTS(SELECT 1 FROM users WHERE email = \(bind: email)) AS user_exists
+            SELECT EXISTS(
+                SELECT 1 FROM users
+                WHERE email = \(bind: email)
+                  AND provider IS NULL
+            ) AS user_exists
             """).all()
 
         guard let row = rows.first else {
@@ -132,6 +137,13 @@ actor MySQLUserRepository: UserRepository {
             createdAt: try? row.decode(column: "created_at", as: Date.self),
             updatedAt: try? row.decode(column: "updated_at", as: Date.self)
         )
+    }
+
+    func updateNickname(userId: Int, nickname: String) async throws {
+        try await db.raw("""
+        UPDATE users SET nickname = \(bind: nickname),
+        update_at = CURRENT_TIMESTAMP WHERE id = \(bind: userId)
+        """).run()
     }
 
 

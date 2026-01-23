@@ -46,3 +46,15 @@ enum IGDBServiceKey: StorageKey {
 struct SocialAuthServiceKey: StorageKey {
     typealias Value = SocialAuthService
 }
+
+struct ProfileRepositoryKey: StorageKey {
+      typealias Value = ProfileRepository
+}
+
+struct R2ConfigKey: StorageKey {
+    typealias Value = R2Config
+}
+
+struct R2ServiceKey: StorageKey {
+    typealias Value = R2Service
+}
