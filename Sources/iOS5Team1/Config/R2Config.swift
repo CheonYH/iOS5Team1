@@ -38,7 +38,8 @@ struct R2Config {
             return nil
         }
 
-        let publicBaseUrl = "https://\(accountId).r2.cloudflarestorage.com/\(bucket)"
+        let publicBaseUrl = Environment.get("R2_PUBLIC_BASE_URL")
+            ?? "https://\(accountId).r2.cloudflarestorage.com/\(bucket)"
 
         return R2Config(
             accessKeyId: accessKeyId,
