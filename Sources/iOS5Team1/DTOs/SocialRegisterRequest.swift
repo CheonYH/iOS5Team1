@@ -21,4 +21,5 @@ struct SocialRegisterRequest: Content {
     let providerUid: String
     let nickname: String
     let email: String?
+    let deviceId: String?
 }

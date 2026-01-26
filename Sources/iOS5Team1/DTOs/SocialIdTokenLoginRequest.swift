@@ -17,4 +17,5 @@ import Vapor
 struct SocialIdTokenLoginRequest: Content {
     let idToken: String
     let provider: SocialProvider
+    let deviceId: String?
 }

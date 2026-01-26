@@ -12,4 +12,6 @@ import Vapor
 struct RefreshRequest: Content {
     /// 클라이언트가 보유한 리프레시 토큰 문자열
     let refreshToken: String
+    /// 기기 식별자(헤더 미전송 시 대체)
+    let deviceId: String?
 }

@@ -71,13 +71,14 @@ actor MyAuthService: AuthService {
         let newAccess = try await generateAccessToken(req: req, userId: stored.userId)
         let newRefresh = generateRefreshToken()
         let newExpires = Date().addingTimeInterval(refreshTTL)
+        let deviceID = stored.deviceID ?? resolveDeviceID(req: req)
 
         try await refreshTokens.revoke(refreshToken)
         try await refreshTokens.create(
             userId: stored.userId,
             token: newRefresh,
             expiresAt: newExpires,
-            deviceID: stored.deviceID,
+            deviceID: deviceID,
             userAgent: stored.userAgent,
             ip: stored.ip,
             platform: stored.platform
@@ -100,13 +101,13 @@ actor MyAuthService: AuthService {
         let access = try await generateAccessToken(req: req, userId: userId)
         let refresh = generateRefreshToken()
         let expires = Date().addingTimeInterval(refreshTTL)
-        let deviceID = req.headers["X-Device-ID"].first
+        let deviceID = resolveDeviceID(req: req)
 
         if let deviceID {
             // Ensure a single active refresh token per device.
             try await refreshTokens.revokeAll(for: userId, deviceID: deviceID)
         } else {
-            req.logger.warning("Missing X-Device-ID header when issuing refresh token.")
+            req.logger.warning("Missing device id when issuing refresh token.")
         }
 
         try await refreshTokens.create(
@@ -153,6 +154,10 @@ actor MyAuthService: AuthService {
 
     private func generateRefreshToken() -> String {
         UUID().uuidString + UUID().uuidString
+    }
+
+    private func resolveDeviceID(req: Request) -> String? {
+        return req.headers["X-Device-ID"].first ?? req.storage[RequestDeviceIDKey.self]
     }
 }
 

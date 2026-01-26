@@ -62,12 +62,14 @@ struct AuthController: RouteCollection, Sendable {
     /// 로그인 후 액세스/리프레시 토큰을 반환합니다.
     func login(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(LoginRequest.self)
+        storeDeviceIDIfNeeded(req: req, deviceId: body.deviceId)
         return try await authService.login(req: req, email: body.email, password: body.password)
     }
 
     /// 리프레시 토큰으로 액세스 토큰을 재발급합니다.
     func refresh(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(RefreshRequest.self)
+        storeDeviceIDIfNeeded(req: req, deviceId: body.deviceId)
         return try await authService.refresh(req: req, refreshToken: body.refreshToken)
     }
 
@@ -90,6 +92,7 @@ struct AuthController: RouteCollection, Sendable {
     /// 소셜 로그인 진입점입니다.
     func socialLogin(req: Request) async throws -> Response {
         let body = try req.content.decode(SocialIdTokenLoginRequest.self)
+        storeDeviceIDIfNeeded(req: req, deviceId: body.deviceId)
         let provider = body.provider
 
         let verified = try await socialAuthService.verifySocial(
@@ -123,6 +126,7 @@ struct AuthController: RouteCollection, Sendable {
     /// 소셜 회원가입을 처리합니다.
     func socialRegister(req: Request) async throws -> TokenPair {
         let body = try req.content.decode(SocialRegisterRequest.self)
+        storeDeviceIDIfNeeded(req: req, deviceId: body.deviceId)
 
         guard let provider = SocialProvider(rawValue: body.provider) else {
             throw Abort(.badRequest, reason: "Invalid provider")
@@ -159,6 +163,13 @@ struct AuthController: RouteCollection, Sendable {
 
         try await users.updateNickname(userId: userId, nickname: body.nickName)
         return .ok
+    }
+
+    private func storeDeviceIDIfNeeded(req: Request, deviceId: String?) {
+        guard req.headers["X-Device-ID"].first == nil, let deviceId, !deviceId.isEmpty else {
+            return
+        }
+        req.storage[RequestDeviceIDKey.self] = deviceId
     }
 
 }
