@@ -76,6 +76,8 @@ struct AuthController: RouteCollection, Sendable {
     /// 로그아웃 처리(리프레시 토큰 폐기)입니다.
     func logout(req: Request) async throws -> HTTPStatus {
         let body = try req.content.decode(RefreshRequest.self)
+        let tokenPrefix = String(body.refreshToken.prefix(8))
+        req.logger.info("Logout requested with refresh token prefix=\(tokenPrefix) len=\(body.refreshToken.count)")
         try await authService.logout(refreshToken: body.refreshToken)
         return .ok
     }
