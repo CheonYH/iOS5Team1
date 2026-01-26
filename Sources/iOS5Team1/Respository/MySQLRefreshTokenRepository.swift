@@ -115,6 +115,15 @@ struct MySQLRefreshTokenRepository: RefreshTokenRepository {
         """).run()
     }
 
+    func revokeAll(for userId: Int, deviceID: String) async throws {
+        try await db.raw("""
+            UPDATE refresh_tokens
+            SET revoked_at = CURRENT_TIMESTAMP
+            WHERE user_id = \(bind: userId)
+              AND device_id = \(bind: deviceID)
+        """).run()
+    }
+
     func cleanupExpired() async throws {
         try await db.raw("""
             DELETE FROM refresh_tokens

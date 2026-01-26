@@ -100,12 +100,18 @@ actor MyAuthService: AuthService {
         let access = try await generateAccessToken(req: req, userId: userId)
         let refresh = generateRefreshToken()
         let expires = Date().addingTimeInterval(refreshTTL)
+        let deviceID = req.headers["X-Device-ID"].first
+
+        if let deviceID {
+            // Ensure a single active refresh token per device.
+            try await refreshTokens.revokeAll(for: userId, deviceID: deviceID)
+        }
 
         try await refreshTokens.create(
             userId: userId,
             token: refresh,
             expiresAt: expires,
-            deviceID: req.headers["X-Device-ID"].first,
+            deviceID: deviceID,
             userAgent: req.headers.userAgent,
             ip: req.remoteAddress?.ipAddress,
             platform: "ios"

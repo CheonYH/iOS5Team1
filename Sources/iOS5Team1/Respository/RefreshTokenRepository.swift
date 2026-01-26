@@ -29,11 +29,12 @@ protocol RefreshTokenRepository: Sendable {
 
     func revokeAll(for userId: Int) async throws
 
+    func revokeAll(for userId: Int, deviceID: String) async throws
+
     func delete(_ token: String) async throws
 
     func deleteAll(for userId: Int) async throws
 
     func cleanupExpired() async throws
 }
-
 
