@@ -105,6 +105,8 @@ actor MyAuthService: AuthService {
         if let deviceID {
             // Ensure a single active refresh token per device.
             try await refreshTokens.revokeAll(for: userId, deviceID: deviceID)
+        } else {
+            req.logger.warning("Missing X-Device-ID header when issuing refresh token.")
         }
 
         try await refreshTokens.create(
