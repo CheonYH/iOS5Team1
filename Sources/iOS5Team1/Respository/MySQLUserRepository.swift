@@ -117,26 +117,16 @@ actor MySQLUserRepository: UserRepository {
 
     func createSocial(email: String?, provider: String, providerUid: String, nickname: String) async throws -> User {
 
-        let rows = try await db.raw("""
+        try await db.raw("""
             INSERT INTO users (email, provider, provider_uid, nickname)
             VALUES (\(bind: email), \(bind: provider), \(bind: providerUid), \(bind: nickname))
-            RETURNING id, email, provider, provider_uid, nickname, created_at, updated_at
-        """).all()
+        """).run()
 
-        guard let row = rows.first else {
+        guard let user = try await findByProvider(uid: providerUid, provider: provider) else {
             throw Abort(.internalServerError, reason: "failed to create user")
         }
 
-        return User(
-            id: try row.decode(column: "id", as: Int.self),
-            email: try row.decode(column: "email", as: String?.self),
-            password: nil,
-            nickname: try row.decode(column: "nickname", as: String.self),
-            provider: try row.decode(column: "provider", as: String?.self),
-            providerUid: try row.decode(column: "provider_uid", as: String?.self),
-            createdAt: try? row.decode(column: "created_at", as: Date.self),
-            updatedAt: try? row.decode(column: "updated_at", as: Date.self)
-        )
+        return user
     }
 
     func updateNickname(userId: Int, nickname: String) async throws {
