@@ -61,12 +61,14 @@ struct MySQLReviewRepository: ReviewRepository {
             SELECT
                 id,
                 user_id   AS userId,
+                u.nickname AS nickname,
                 game_id   AS gameId,
                 rating,
                 content,
                 created_at AS createdAt,
                 updated_at AS updatedAt
-            FROM reviews
+            FROM reviews r
+            JOIN users u ON u.id = r.user_id
             WHERE game_id = \(bind: gameId)
             \(orderSQL)
         """
@@ -79,13 +81,15 @@ struct MySQLReviewRepository: ReviewRepository {
             SELECT
                 id,
                 user_id   AS userId,
+                u.nickname AS nickname,
                 game_id   AS gameId,
                 rating,
                 content,
                 created_at AS createdAt,
                 updated_at AS updatedAt
-            FROM reviews
-            WHERE user_id = \(bind: userId)
+            FROM reviews r
+            JOIN users u ON u.id = r.user_id
+            WHERE r.user_id = \(bind: userId)
             ORDER BY created_at DESC
         """).all(decoding: ReviewResponse.self)
     }
@@ -106,5 +110,4 @@ struct MySQLReviewRepository: ReviewRepository {
         return .init(gameId: gameId, averageRating: avg, reviewCount: count)
     }
 }
-
 

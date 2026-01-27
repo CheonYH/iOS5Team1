@@ -13,6 +13,8 @@ struct ReviewResponse: Content {
     let id: Int
     /// 작성자(사용자) 식별자
     let userId: Int
+    /// 작성자 닉네임
+    let nickname: String
     /// 대상 게임 식별자
     let gameId: Int
     /// 평점 값(예: 1~5)
@@ -24,5 +26,4 @@ struct ReviewResponse: Content {
     /// 수정 시각(수정 전이면 nil)
     let updatedAt: Date?
 }
-
 
