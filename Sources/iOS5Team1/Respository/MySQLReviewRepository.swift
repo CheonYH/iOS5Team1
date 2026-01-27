@@ -59,14 +59,14 @@ struct MySQLReviewRepository: ReviewRepository {
 
         let sql: SQLQueryString = """
             SELECT
-                id,
-                user_id   AS userId,
+                r.id,
+                r.user_id   AS userId,
                 u.nickname AS nickname,
-                game_id   AS gameId,
-                rating,
-                content,
-                created_at AS createdAt,
-                updated_at AS updatedAt
+                r.game_id   AS gameId,
+                r.rating,
+                r.content,
+                r.created_at AS createdAt,
+                r.updated_at AS updatedAt
             FROM reviews r
             JOIN users u ON u.id = r.user_id
             WHERE game_id = \(bind: gameId)
@@ -79,14 +79,14 @@ struct MySQLReviewRepository: ReviewRepository {
     func fetchByUser(userId: Int) async throws -> [ReviewResponse] {
         try await db.raw("""
             SELECT
-                id,
-                user_id   AS userId,
+                r.id,
+                r.user_id   AS userId,
                 u.nickname AS nickname,
-                game_id   AS gameId,
-                rating,
-                content,
-                created_at AS createdAt,
-                updated_at AS updatedAt
+                r.game_id   AS gameId,
+                r.rating,
+                r.content,
+                r.created_at AS createdAt,
+                r.updated_at AS updatedAt
             FROM reviews r
             JOIN users u ON u.id = r.user_id
             WHERE r.user_id = \(bind: userId)
@@ -110,4 +110,3 @@ struct MySQLReviewRepository: ReviewRepository {
         return .init(gameId: gameId, averageRating: avg, reviewCount: count)
     }
 }
-
