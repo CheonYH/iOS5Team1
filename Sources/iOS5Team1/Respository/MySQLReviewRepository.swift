@@ -50,11 +50,11 @@ struct MySQLReviewRepository: ReviewRepository {
 
         switch sort {
         case .latest:
-            orderSQL = "ORDER BY created_at DESC"
+            orderSQL = "ORDER BY r.created_at DESC"
         case .highest:
-            orderSQL = "ORDER BY rating DESC, created_at DESC"
+            orderSQL = "ORDER BY r.rating DESC, r.created_at DESC"
         case .lowest:
-            orderSQL = "ORDER BY rating ASC, created_at DESC"
+            orderSQL = "ORDER BY r.rating ASC, r.created_at DESC"
         }
 
         let sql: SQLQueryString = """
@@ -90,7 +90,7 @@ struct MySQLReviewRepository: ReviewRepository {
             FROM reviews r
             JOIN users u ON u.id = r.user_id
             WHERE r.user_id = \(bind: userId)
-            ORDER BY created_at DESC
+            ORDER BY r.created_at DESC
         """).all(decoding: ReviewResponse.self)
     }
 
