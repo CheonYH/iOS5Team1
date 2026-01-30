@@ -181,6 +181,7 @@ public func configure(_ app: Application) async throws {
         authService: authService,
         users: userRepo,
         profiles: profileRepo,
+        refreshTokens: refreshRepo,
         socialAuthService: socialAuthService
     ))
     try app.register(collection: ReviewController(service: reviewService))

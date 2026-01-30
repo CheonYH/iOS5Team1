@@ -29,14 +29,14 @@ struct StandardErrorMiddleware: AsyncMiddleware {
         }
     }
 
-    private static func makeResponse(for error: Error, req: Request) -> Response {
+    private static func makeResponse(for error: any Error, req: Request) -> Response {
         let (status, code, message, details) = classify(error)
         let payload = ErrorEnvelope(
             error: ErrorPayload(
                 code: code,
                 message: message,
                 details: details,
-                requestId: req.id.uuidString
+                requestId: req.id
             )
         )
 
@@ -52,8 +52,8 @@ struct StandardErrorMiddleware: AsyncMiddleware {
         return res
     }
 
-    private static func classify(_ error: Error) -> (HTTPStatus, String, String, [String: String]?) {
-        if let abort = error as? AbortError {
+    private static func classify(_ error: any Error) -> (HTTPStatus, String, String, [String: String]?) {
+        if let abort = error as? any AbortError {
             let status = abort.status
             let reason = abort.reason.isEmpty ? status.reasonPhrase : abort.reason
             let (code, details) = mapCode(status: status, reason: reason)
