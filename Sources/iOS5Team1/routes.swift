@@ -34,6 +34,9 @@ func routes(_ app: Application) throws {
     guard let socialAuthService = app.storage[SocialAuthServiceKey.self] else {
         fatalError("SocialAuthService not registered")
     }
+    guard let refreshTokens = app.storage[RefreshTokenRepositoryKey.self] else {
+        fatalError("RefreshTokenRepository not registered")
+    }
 
     // Auth 컨트롤러 등록
     guard let profiles = app.storage[ProfileRepositoryKey.self] else {
@@ -44,6 +47,7 @@ func routes(_ app: Application) throws {
         authService: authService,
         users: users,
         profiles: profiles,
+        refreshTokens: refreshTokens,
         socialAuthService: socialAuthService
     )
     try app.register(collection: authController)

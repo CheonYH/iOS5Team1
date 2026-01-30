@@ -242,8 +242,11 @@
 - 토큰 갱신: `POST /auth/refresh`
 - 로그아웃: `POST /auth/logout`
 - 닉네임 중복 확인: `POST /auth/nickname-check`
+- 온보딩 완료 처리: `POST /auth/onboarding-complete` (JWT 필요)
+- 회원탈퇴(soft delete): `DELETE /auth/me` (JWT 필요)
 
 로그인은 `AuthController` → `MyAuthService` → `UserRepository` 순서로 처리됩니다.
+로그인/소셜 로그인 응답에는 `onboardingCompleted` 플래그가 포함됩니다.
 
 토큰은 JWT(HMAC) 기반이며, 보호가 필요한 라우트는 `JWTMiddleware`가 먼저 검증합니다.
 

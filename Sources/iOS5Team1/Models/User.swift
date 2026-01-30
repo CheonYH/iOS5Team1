@@ -16,6 +16,8 @@ struct User: Decodable {
     let nickname: String
     let provider: String?        // local/google/apple 등
     let providerUid: String?     // UID
+    let onboardingCompleted: Bool
+    let deletedAt: Date?
     let createdAt: Date?
     let updatedAt: Date?
 }

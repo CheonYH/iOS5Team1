@@ -26,5 +26,8 @@ protocol UserRepository: Sendable {
 
     func updateNickname(userId: Int, nickname: String) async throws 
 
-}
+    func updateOnboardingCompleted(userId: Int, completed: Bool) async throws
 
+    func softDelete(userId: Int) async throws
+
+}

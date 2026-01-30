@@ -23,7 +23,7 @@ actor MySQLUserRepository: UserRepository {
     /// 이메일로 사용자 1명을 조회합니다. 없으면 nil 반환
     func findByEmail(_ email: String) async throws -> User? {
         let rows = try await db.raw("""
-            SELECT id, email, password, nickname, provider, provider_uid, created_at, updated_at
+            SELECT id, email, password, nickname, provider, provider_uid, onboarding_completed, deleted_at, created_at, updated_at
             FROM users
             WHERE email = \(bind: email)
               AND (provider IS NULL OR provider = 'local')
@@ -40,6 +40,8 @@ actor MySQLUserRepository: UserRepository {
             nickname: try row.decode(column: "nickname", as: String.self),
             provider: try row.decode(column: "provider", as: String?.self),
             providerUid: try row.decode(column: "provider_uid", as: String?.self),
+            onboardingCompleted: try row.decode(column: "onboarding_completed", as: Bool.self),
+            deletedAt: try row.decode(column: "deleted_at", as: Date?.self),
             createdAt: try row.decode(column: "created_at", as: Date?.self),
             updatedAt: try row.decode(column: "updated_at", as: Date?.self)
         )
@@ -93,7 +95,7 @@ actor MySQLUserRepository: UserRepository {
 
     func findByProvider(uid: String, provider: String) async throws -> User? {
         let rows = try await db.raw("""
-            SELECT id, email, password, nickname, provider, provider_uid, created_at, updated_at
+            SELECT id, email, password, nickname, provider, provider_uid, onboarding_completed, deleted_at, created_at, updated_at
             FROM users
             WHERE provider = \(bind: provider) AND provider_uid = \(bind: uid)
             LIMIT 1
@@ -108,6 +110,8 @@ actor MySQLUserRepository: UserRepository {
             nickname: try row.decode(column: "nickname", as: String.self),
             provider: try row.decode(column: "provider", as: String?.self),
             providerUid: try row.decode(column: "provider_uid", as: String?.self),
+            onboardingCompleted: try row.decode(column: "onboarding_completed", as: Bool.self),
+            deletedAt: try row.decode(column: "deleted_at", as: Date?.self),
             createdAt: try row.decode(column: "created_at", as: Date?.self),
             updatedAt: try row.decode(column: "updated_at", as: Date?.self)
         )
@@ -132,6 +136,20 @@ actor MySQLUserRepository: UserRepository {
     func updateNickname(userId: Int, nickname: String) async throws {
         try await db.raw("""
         UPDATE users SET nickname = \(bind: nickname),
+        updated_at = CURRENT_TIMESTAMP WHERE id = \(bind: userId)
+        """).run()
+    }
+
+    func updateOnboardingCompleted(userId: Int, completed: Bool) async throws {
+        try await db.raw("""
+        UPDATE users SET onboarding_completed = \(bind: completed),
+        updated_at = CURRENT_TIMESTAMP WHERE id = \(bind: userId)
+        """).run()
+    }
+
+    func softDelete(userId: Int) async throws {
+        try await db.raw("""
+        UPDATE users SET deleted_at = CURRENT_TIMESTAMP,
         updated_at = CURRENT_TIMESTAMP WHERE id = \(bind: userId)
         """).run()
     }

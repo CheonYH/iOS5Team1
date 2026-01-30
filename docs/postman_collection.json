@@ -6,7 +6,8 @@
   },
   "variable": [
     { "key": "base_url", "value": "http://localhost:8080" },
-    { "key": "access_token", "value": "" }
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" }
   ],
   "item": [
     {
@@ -45,7 +46,24 @@
               "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": "{{base_url}}/auth/login"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.access) {",
+                  "  pm.collectionVariables.set('access_token', json.access);",
+                  "}",
+                  "if (json && json.refresh) {",
+                  "  pm.collectionVariables.set('refresh_token', json.refresh);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Refresh",
@@ -56,10 +74,27 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"REFRESH_TOKEN\"\n}"
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
             },
             "url": "{{base_url}}/auth/refresh"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.access) {",
+                  "  pm.collectionVariables.set('access_token', json.access);",
+                  "}",
+                  "if (json && json.refresh) {",
+                  "  pm.collectionVariables.set('refresh_token', json.refresh);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Logout",
@@ -70,7 +105,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"REFRESH_TOKEN\"\n}"
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
             },
             "url": "{{base_url}}/auth/logout"
           }
@@ -87,6 +122,66 @@
               "raw": "{\n  \"nickname\": \"tester\"\n}"
             },
             "url": "{{base_url}}/auth/nickname-check"
+          }
+        },
+        {
+          "name": "Nickname Update",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickName\": \"newNickname\"\n}"
+            },
+            "url": "{{base_url}}/auth/nickname-update"
+          }
+        },
+        {
+          "name": "Social Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"google\",\n  \"idToken\": \"<google_id_token>\",\n  \"deviceId\": \"ios-device-001\"\n}"
+            },
+            "url": "{{base_url}}/auth/social"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.access) {",
+                  "  pm.collectionVariables.set('access_token', json.access);",
+                  "}",
+                  "if (json && json.refresh) {",
+                  "  pm.collectionVariables.set('refresh_token', json.refresh);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Social Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"google\",\n  \"providerUid\": \"<uid>\",\n  \"nickname\": \"tester\",\n  \"email\": \"test@example.com\",\n  \"deviceId\": \"ios-device-001\"\n}"
+            },
+            "url": "{{base_url}}/auth/social-register"
           }
         }
       ]
@@ -266,6 +361,74 @@
           "request": {
             "method": "GET",
             "url": "{{base_url}}/firebase/config"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "Login Wrong Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"wrong_password\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Refresh Invalid Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"INVALID\"\n}"
+            },
+            "url": "{{base_url}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Nickname Update Without Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickName\": \"newNickname\"\n}"
+            },
+            "url": "{{base_url}}/auth/nickname-update"
+          }
+        },
+        {
+          "name": "Profile Get Without Token",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/profile"
+          }
+        },
+        {
+          "name": "Social Unsupported Provider",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"unknown\",\n  \"idToken\": \"INVALID\",\n  \"deviceId\": \"ios-device-001\"\n}"
+            },
+            "url": "{{base_url}}/auth/social"
           }
         }
       ]

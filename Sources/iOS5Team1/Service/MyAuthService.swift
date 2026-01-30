@@ -39,6 +39,10 @@ actor MyAuthService: AuthService {
             throw Abort(.unauthorized, reason: "email or password incorrect")
         }
 
+        guard user.deletedAt == nil else {
+            throw Abort(.forbidden, reason: "account deleted")
+        }
+
         guard let hashed = user.password else {
             throw Abort(.forbidden, reason: "this account uses social login")
         }
