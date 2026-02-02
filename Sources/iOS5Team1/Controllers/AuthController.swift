@@ -43,6 +43,7 @@ struct AuthController: RouteCollection, Sendable {
         protected.post("nickname-update", use: updateNickname)
         protected.post("onboarding-complete", use: completeOnboarding)
         protected.delete("me", use: deleteAccount)
+        protected.get("me", use: me)
 
     }
 
@@ -201,6 +202,27 @@ struct AuthController: RouteCollection, Sendable {
 
         try await users.updateOnboardingCompleted(userId: userId, completed: true)
         return .ok
+    }
+
+    /// 자동 로그인 시 사용자 상태를 조회합니다.
+    func me(req: Request) async throws -> AuthMeResponse {
+        let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
+        guard let userId = Int(payload.sub.value) else {
+            throw Abort(.unauthorized)
+        }
+
+        guard let user = try await users.findById(userId) else {
+            throw Abort(.notFound, reason: "user not found")
+        }
+
+        guard user.deletedAt == nil else {
+            throw Abort(.forbidden, reason: "account deleted")
+        }
+
+        return AuthMeResponse(
+            userId: user.id,
+            onboardingCompleted: user.onboardingCompleted
+        )
     }
 
     /// 회원탈퇴(soft delete) 처리합니다.

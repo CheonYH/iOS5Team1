@@ -47,6 +47,31 @@ actor MySQLUserRepository: UserRepository {
         )
     }
 
+    func findById(_ id: Int) async throws -> User? {
+        let rows = try await db.raw("""
+            SELECT id, email, password, nickname, provider, provider_uid, onboarding_completed, deleted_at, created_at, updated_at
+            FROM users
+            WHERE id = \(bind: id)
+            LIMIT 1
+            """)
+            .all()
+
+        guard let row = rows.first else { return nil }
+
+        return User(
+            id: try row.decode(column: "id", as: Int.self),
+            email: try row.decode(column: "email", as: String?.self),
+            password: try row.decode(column: "password", as: String?.self),
+            nickname: try row.decode(column: "nickname", as: String.self),
+            provider: try row.decode(column: "provider", as: String?.self),
+            providerUid: try row.decode(column: "provider_uid", as: String?.self),
+            onboardingCompleted: try row.decode(column: "onboarding_completed", as: Bool.self),
+            deletedAt: try row.decode(column: "deleted_at", as: Date?.self),
+            createdAt: try row.decode(column: "created_at", as: Date?.self),
+            updatedAt: try row.decode(column: "updated_at", as: Date?.self)
+        )
+    }
+
     /// 이메일 중복 여부 확인
     func exists(email: String) async throws -> Bool {
         let rows = try await db.raw("""

@@ -244,6 +244,7 @@
 - 닉네임 중복 확인: `POST /auth/nickname-check`
 - 온보딩 완료 처리: `POST /auth/onboarding-complete` (JWT 필요)
 - 회원탈퇴(soft delete): `DELETE /auth/me` (JWT 필요)
+- 내 인증 상태 조회(자동 로그인용): `GET /auth/me` (JWT 필요)
 
 로그인은 `AuthController` → `MyAuthService` → `UserRepository` 순서로 처리됩니다.
 로그인/소셜 로그인 응답에는 `onboardingCompleted` 플래그가 포함됩니다.
