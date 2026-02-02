@@ -194,14 +194,17 @@ struct AuthController: RouteCollection, Sendable {
     }
 
     /// 온보딩 완료 플래그를 true로 설정합니다.
-    func completeOnboarding(req: Request) async throws -> HTTPStatus {
+    func completeOnboarding(req: Request) async throws -> OnboardingCompleteResponse {
         let payload = try await req.jwt.verify(as: AccessTokenPayload.self)
         guard let userId = Int(payload.sub.value) else {
             throw Abort(.unauthorized)
         }
 
         try await users.updateOnboardingCompleted(userId: userId, completed: true)
-        return .ok
+        return OnboardingCompleteResponse(
+            success: true,
+            onboardingCompleted: true
+        )
     }
 
     /// 자동 로그인 시 사용자 상태를 조회합니다.
